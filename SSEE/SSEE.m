@@ -119,9 +119,6 @@ function par=read_txt(fileName)
 % # Bref = 1.5
 % # fRef = 50
 % # dens = 7650
-% # Jsat = 1.995
-% # Hpar = 11652
-% # mu_ri= 1183
 % double JH(33, 2)
 % 0.000000000	00.00000000
 % Important: use the same delimiter '\t' for all lines of data!
@@ -138,7 +135,7 @@ function par=read_txt(fileName)
     fclose(fID);
 % raw data arrays J and H (ensure that all lines use the same delimiter!)
     if exist("OCTAVE_VERSION","builtin")>0
-        RD=dlmread(fileName,'\t',10,0);
+        RD=dlmread(fileName,'\t',7,0);
     else
         RD=readmatrix(fileName);
     end
@@ -168,18 +165,18 @@ function par=read_xls(fileName, material)
         par.BRef=xlsread(fileName,material,'B3:B3');
         par.fRef=xlsread(fileName,material,'B4:B4');
         par.dens=xlsread(fileName,material,'B5:B5');
-        n=9-1+   xlsread(fileName,material,'B7:B7');
-% raw data arrays J and H (ensure that all lines use the same delimiter!)
-        RD=xlsread(fileName,material,['A9:B' mat2str(n)]);
+        n=8-1+   xlsread(fileName,material,'B6:B6');
+% raw data arrays J and H
+        RD=xlsread(fileName,material,['A8:B' mat2str(n)]);
     else
 % get additional scalar parameters to save them later to the parameter file
         par.vRef=readmatrix(fileName,'Sheet',material,'Range','B2:B2');
         par.BRef=readmatrix(fileName,'Sheet',material,'Range','B3:B3');
         par.fRef=readmatrix(fileName,'Sheet',material,'Range','B4:B4');
         par.dens=readmatrix(fileName,'Sheet',material,'Range','B5:B5');
-        n=9-1+   readmatrix(fileName,'Sheet',material,'Range','B7:B7');
-% raw data arrays J and H (ensure that all lines use the same delimiter!)
-        RD=readmatrix(fileName,'Sheet',material,'Range',['A9:B' mat2str(n)]);
+        n=8-1+   readmatrix(fileName,'Sheet',material,'Range','B6:B6');
+% raw data arrays J and H
+        RD=readmatrix(fileName,'Sheet',material,'Range',['A8:B' mat2str(n)]);
     end
     par.HD=RD(:,2); par.JD=RD(:,1);
     dispVal("xls: Lines of raw data=", length(par.HD));

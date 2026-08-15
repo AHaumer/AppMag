@@ -11,7 +11,6 @@ Each material is stored in a separate sheet with the following format:
 - BRef      1.5    T       flux density for measurement of vRef
 - fRef      50.    Hz      frequency for measurement of vRef
 - dens    7500.    kg/m3   density of material
-- thick    0.35    mm      thickness of sheet
 - N          22            number of knots
 - J[T]   H[A/m]            table of measurements
 - 0      0                 starting at the origin
