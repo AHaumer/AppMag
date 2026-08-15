@@ -16,11 +16,10 @@ Each material is stored in a separate sheet with the following format:
 - J[T]   H[A/m]            table of measurements
 - 0      0                 starting at the origin
 ```
-
-Raw data were provided by [VoestAlpine](https://www.voestalpine.com/isovac/en/Downloads/Datasheets).
-Many thanks for that valuable support!
-
 Furthermore there is a growing collection of functions that can be called in Octave or Matlab.
 It is planned to provide different methods of approximation.
 First, Smoothing Splines with Exponential Extrapolation [SSEE](https://github.com/AHaumer/AppMag/tree/main/SSEE) are implemented.
 
+## Acknowledgements
+Raw data was provided by [VoestAlpine](https://www.voestalpine.com/isovac/en/Downloads/Datasheets).
+Many thanks for that valuable support!
