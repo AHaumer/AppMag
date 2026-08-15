@@ -22,5 +22,5 @@ Many thanks for that valuable support!
 
 Furthermore there is a growing collection of functions that can be called in Octave or Matlab.
 It is planned to provide different methods of approximation.
-First, Smoothing Splines with Exponential Extrapolation [SSEE](https://github.com/AHaumer/AppMag/tree/main) are implemented.
+First, Smoothing Splines with Exponential Extrapolation [SSEE](https://github.com/AHaumer/AppMag/tree/main/SSEE) are implemented.
 
