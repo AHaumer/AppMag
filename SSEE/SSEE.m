@@ -87,7 +87,7 @@ function par=SSEE(material, varargin)
     end
     par.pp.coefs(:,4)=par.pp.coefs(:,4)-ones(size(par.pp.coefs,1),1)*dJ;
 % determine optimal exponential extrapolation
-    obj = @(x)funObj(x, par);
+    obj = @(x)funObjEE(x, par);
     x0 = [2, 1]; % scaling x=[Jsat, Hpar/10000]
     [x,fval] = fminunc(obj, x0);
     dispVal("fminunc: fval=",fval);
@@ -99,17 +99,19 @@ function par=SSEE(material, varargin)
 % plot and save result
     pltRes(par);
 % show inflection point of J(H): mu_rd - mu_r = d mu_r/dH * H = 0
-    choice=menu('Is the inflection point of J(H) / the maximum of mu_r(H) present?','Yes','No');
+    choice=menu('Inflection point of J(H) = the maximum of mu_r(H) ?','Yes','No');
     if choice==1
         fun = @(H)(fnval(par.pp,H)/H-fnval(par.dpp,H));
-        par.Hip=fzero(fun,[0.1*par.HD(2) par.HD(par.k0)]);
-        par.Jip=app_J(par, par.Hip);
-        par.Bip=mu_0*par.Hip+par.Jip;
-        par.mu_rMax=par.Bip/(mu_0*par.Hip);
-        disp('Inflection point of J(H) / maximum of mu_r(H):');
-        dispVal('H   =',par.Hip);
-        dispVal('B   =',par.Bip);
-        dispVal('mu_r=',par.mu_rMax);
+        par.H_muMax=fzero(fun,[0.1*par.HD(2) par.HD(par.k0)]);
+        par.J_muMax=app_J(par, par.H_muMax);
+        par.B_muMax=mu_0*par.H_muMax+par.J_muMax;
+        par.mu_rMax=par.B_muMax/(mu_0*par.H_muMax);
+        disp('Inflection point of J(H) = maximum of mu_r(H):');
+        dispVal('H_muMax=',par.H_muMax);
+        dispVal('B_muMax=',par.B_muMax);
+        dispVal('mu_rMax=',par.mu_rMax);
+        figure(2); plot([0,par.H_muMax],[0,par.J_muMax], 'r-.');
+        figure(4); plot([par.H_muMax,par.H_muMax],[0,par.mu_rMax],'r-.');
     end
 % Octave shows additional points at the beginning and at the end!
     if isOctave
@@ -215,9 +217,9 @@ function dispVal(s, v)
     disp(strcat(s, mat2str(v)));
 end
 
-function y=funObj(x, par)
+function y=funObjEE(x, par)
 % -----------------------------------------------------------------------
-% Purpose: Define objective function for optimization
+% Purpose: objective function for optimization of exp.extrapolation
 % Input  : Vector of optimization parameters x, struct par
 % Output : objective function value to be minimized
 % Author : A. Haumer
@@ -356,6 +358,7 @@ function pltRes(par)
     Hmax=max(max(par.HD),50000);
     Np=10000; % number of points
     H=linspace(Hmin,Hmax,Np);
+    ND=length(par.HD);
 % pre-allocate result vectors to increase speed
     J=zeros(Np,1); mu_r=zeros(Np,1); mu_rd=zeros(Np,1);
     for kp=1:Np
@@ -365,25 +368,36 @@ function pltRes(par)
     end
 % J(H)
     fig1a=figure;
+    semilogx(H(2:Np), J(2:Np), 'b-'); hold on;
+    semilogx(par.HD(2:ND), par.JD(2:ND), 'ro');
+    title(par.material); grid on;
+    xlabel("H [A/m]"); ylabel("J [T]");
+    legend('J(H)','measured','Location','southeast');
+    fig1b=figure;
     plot(H, J, 'b-'); hold on;
     plot(par.HD, par.JD, 'ro');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("J [T]");
     legend('J(H)','measured','Location','southeast');
-    fig1b=copyobj(fig1a, groot);
-    xlim([0 2500]); shg;
+    xlim([0 2000]);
 % mu_r(H) and mu_rd(H)
     fig2a=figure;
+    loglog(H(2:Np), mu_r(2:Np), 'b-'); hold on;
+    loglog(par.HD(2:ND), par.mu_rD(2:ND), 'ro');
+    loglog(H(2:Np), mu_rd(2:Np), 'k--');
+    loglog(par.HD(2:ND), par.mu_rdD(2:ND), 'mo');
+    title(par.material); grid on;
+    xlabel("H [A/m]"); ylabel("µ_r");
+    legend('µ_r(H)','measured','µ_r_d(H)','measured','Location','northeast');
+    fig2b=figure;
     plot(H, mu_r, 'b-'); hold on;
     plot(par.HD, par.mu_rD, 'ro');
     plot(H, mu_rd, 'k--');
     plot(par.HD, par.mu_rdD, 'mo');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("µ_r");
-    savLim=ylim;  ylim([0 1000]);
     legend('µ_r(H)','measured','µ_r_d(H)','measured','Location','northeast');
-    fig2b=copyobj(fig2a, groot);
-    ylim(savLim); xlim([0 1000]); shg;
+    xlim([0 500]);
 end
 
 function savPar(par)
@@ -463,3 +477,4 @@ function savPar(par)
     end
     fclose(fID);
 end
+
