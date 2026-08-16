@@ -2,7 +2,7 @@ function par=SSEE(material, varargin)
 % -----------------------------------------------------------------------
 % Purpose: calculate Smoothing Splines + Exponential Extrapolation
 % Input  : material
-% optional fT='ods' or 'xlsx' or 'txt' (fileType)
+% optional fT='txt' or 'xlsx' or 'ods' (fileType)
 %          p=0.005  smoothing parameter 0<p<1
 %          H0=2000 where exponential extrapolation starts
 %             check whether a value in HD exists near H0!
@@ -17,7 +17,7 @@ function par=SSEE(material, varargin)
 % Date   : 2026-08-15
 % -----------------------------------------------------------------------
 % handling of optional input arguments
-    fT='ods';
+    fT='txt';
     p =0.005; H0=2000;
     H1= 5000; H2=20000;
     if nargin>=2

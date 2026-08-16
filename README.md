@@ -2,8 +2,9 @@
 Approximation of Magnetization characteristics
 taking into account saturation but neglecting hysteresis
 
-This repository hosts raw data of softmagnetic materials in a spreadsheet file RD.ods
-in OpenDocument format ods (which can be read by LibreOffice and Microsoft Excel).
+This repository hosts in subdirectory RawData datasets of softmagnetic materials 
+as single txt-files, as spreadsheet file RD.ods in OpenDocument format ods 
+and as Microsoft Excel format xlsx.
 Each material is stored in a separate sheet with the following format:
 ```
 - CastIron                 name of material
@@ -15,10 +16,12 @@ Each material is stored in a separate sheet with the following format:
 - J[T]   H[A/m]            table of measurements
 - 0      0                 starting at the origin
 ```
-Furthermore there is a growing collection of functions that can be called in Octave or Matlab.
+
+Copy data set(s) together with the approximation function into a working directory.
+There is a growing collection of functions that can be called in Octave or Matlab.
 It is planned to provide different methods of approximation.
 First, Smoothing Splines with Exponential Extrapolation [SSEE](https://github.com/AHaumer/AppMag/tree/main/SSEE) are implemented.
 
 ## Acknowledgements
-Raw data was provided by [VoestAlpine](https://www.voestalpine.com/isovac/en/Downloads/Datasheets).
+Raw data sets were provided by [VoestAlpine](https://www.voestalpine.com/isovac/en/Downloads/Datasheets).
 Many thanks for that valuable support!

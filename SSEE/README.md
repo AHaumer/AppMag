@@ -29,7 +29,7 @@ par is a struct containing the parameters:
 material has to be specified: The name of the material, same as the name of the sheet in RD.ods
 optional parameters with default values:
 ```
-- ft = 'ods', 'xslx', 'txt'    file type
+- ft = 'txt', 'xslx', 'ods'    file type
 - p  = 0.005                   parameter for smoothing
 - H0 =  2000                   magnetic field strength where exponential extrapolation is based
 - H1 =  5000                   field strength where switch-over from smoothed splines to exponential extrapolation starts
