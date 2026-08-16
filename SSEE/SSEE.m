@@ -101,10 +101,14 @@ function par=SSEE(material, varargin)
              (par.Jsat-par.JD(par.k0)));
 % plot and save result
     pltRes(par);
-% show inflection point of J(H)
-    choice=menu('Inflection point present?','Yes','No');
+% show inflection point of J(H): mu_rd - mu_r = d mu_r/dH * H = 0
+    choice=menu('Is the inflection point of J(H) / the maxmimum of mu_r(H) present?','Yes','No');
     if choice==1
-        Hip=SSIP(par);
+        fun = @(H)(fnval(par.pp,H)/H-fnval(par.dpp,H));
+        par.Hip=fzero(fun,[0.1*par.HD(2) par.HD(par.k0)]);
+        par.Jip=app_J(par, par.Hip);
+        par.Bip=mu_0*par.Hip+par.Jip;
+        par.mu_rMax=par.Bip/(mu_0*par.Hip);
     end
 % Octave shows additional points at the beginning and at the end!
     if isOctave
@@ -443,22 +447,4 @@ function savPar(par)
         kB=kE+1; kE=min(kB+6, N);
     end
     fclose(fID);
-end
-function Hip=SSIP(par)
-% -----------------------------------------------------------------------
-% Purpose: calculate Inflection Point of J(H)
-%          defines by mu_rd-mu_r=d mu_r/dt = 0
-% Input  : struct par with parameters from SSEE
-% Output:  H at inflection point
-% Author : A. Haumer
-% Date   : 2026-08-01
-% -----------------------------------------------------------------------
-if exist("OCTAVE_VERSION","builtin")>0
-    pkg load splines;
-end
-    fun = @(H)(fnval(par.pp,H)/H-fnval(par.dpp,H));
-    Hip=fzero(fun,[0.1*par.HD(2) par.HD(par.k0)]);
-    Jip=app_J(par, Hip);
-    dispVal("H_ip=",Hip);
-    dispVal("J_ip=",Jip);
 end
