@@ -11,9 +11,10 @@ function par=SSEE(material, varargin)
 % Output:  struct par with parameters
 % For information on contents of par see function savPar.
 % Additional (not used in savPar):
-% dpp (struct of differentiated splines), mu_rD and mu_rdD.
+%   dpp (struct of differentiated splines), mu_rD and mu_rdD
+%   H, J, B and mu_rMax at inflection point of J(H)
 % Author : A. Haumer
-% Date   : 2026-08-01
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
 % handling of optional input arguments
     fT='ods';
@@ -70,18 +71,14 @@ function par=SSEE(material, varargin)
 % search for grid point near H0 (be careful specifying H0!)
     par.k0=find(abs(H0-par.HD)<0.01*H0);
     par.hH1=H1;         par.hH2=H2;
-% first pure spline w/o smoothing to determine mu_rdD
-    par.pp=csaps(par.HD,par.JD,1);
-    par.dpp=fnder(par.pp);
-    mu_ri=1+par.pp.coefs(1,3)/mu_0;
-    for kp=1:length(par.HD)
-        par.mu_rdD(kp,1)=1+fnval(par.dpp, par.HD(kp))/mu_0;
-        par.mu_rD(kp,1) =fun_mu_r(par.JD(kp),par.HD(kp),mu_ri);
-    end
 % smoothed spline interpolation
     par.pp=csaps(par.HD,par.JD,p);
     par.dpp=fnder(par.pp);
     par.mu_ri=1+par.pp.coefs(1,3)/mu_0; dispVal("µ_ri=", par.mu_ri);
+    for kp=1:length(par.HD)
+        par.mu_rdD(kp,1)=1+fnval(par.dpp, par.HD(kp))/mu_0;
+        par.mu_rD(kp,1) =fun_mu_r(par.JD(kp),par.HD(kp),par.mu_ri);
+    end
 % correct all constant coefficients: shift characteristic to hit origin
     if isOctave
         dJ=par.pp.coefs(2,4)-par.JD(1);
@@ -102,13 +99,17 @@ function par=SSEE(material, varargin)
 % plot and save result
     pltRes(par);
 % show inflection point of J(H): mu_rd - mu_r = d mu_r/dH * H = 0
-    choice=menu('Is the inflection point of J(H) / the maxmimum of mu_r(H) present?','Yes','No');
+    choice=menu('Is the inflection point of J(H) / the maximum of mu_r(H) present?','Yes','No');
     if choice==1
         fun = @(H)(fnval(par.pp,H)/H-fnval(par.dpp,H));
         par.Hip=fzero(fun,[0.1*par.HD(2) par.HD(par.k0)]);
         par.Jip=app_J(par, par.Hip);
         par.Bip=mu_0*par.Hip+par.Jip;
         par.mu_rMax=par.Bip/(mu_0*par.Hip);
+        disp('Inflection point of J(H) / maximum of mu_r(H):');
+        dispVal('H   =',par.Hip);
+        dispVal('B   =',par.Bip);
+        dispVal('mu_r=',par.mu_rMax);
     end
 % Octave shows additional points at the beginning and at the end!
     if isOctave
@@ -116,6 +117,7 @@ function par=SSEE(material, varargin)
     end
     savPar(par);
 end
+
 function par=read_txt(fileName)
 % -----------------------------------------------------------------------
 % Purpose: read raw data from txt-file
@@ -132,7 +134,7 @@ function par=read_txt(fileName)
 % 0.000000000	00.00000000
 % Important: use the same delimiter '\t' for all lines of data!
 % Author : A. Haumer
-% Date   : 2026-08-01
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
 % get additional scalar parameters to save them later to the parameter file
     fID=fopen(fileName); % skip first 2 lines #1 and # type
@@ -151,6 +153,7 @@ function par=read_txt(fileName)
     par.HD=RD(:,2); par.JD=RD(:,1);
     dispVal("txt: Lines of raw data=", length(par.HD));
 end
+
 function par=read_xls(fileName, material)
 % -----------------------------------------------------------------------
 % Purpose: read raw data from spreadsheet
@@ -166,7 +169,7 @@ function par=read_xls(fileName, material)
 % 7 header: J [T] H [A/m]
 % 8         0     0
 % Author : A. Haumer
-% Date   : 2026-08-01
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     if exist("OCTAVE_VERSION","builtin")>0
 % get additional scalar parameters to save them later to the parameter file
@@ -188,15 +191,16 @@ function par=read_xls(fileName, material)
         RD=readmatrix(fileName,'Sheet',material,'Range',['A8:B' mat2str(n)]);
     end
     par.HD=RD(:,2); par.JD=RD(:,1);
-    dispVal("xls: Lines of raw data=", length(par.HD));
+    dispVal("ods/xls: Lines of raw data=", length(par.HD));
 end
+
 function pp=corOct(ppI)
 % -----------------------------------------------------------------------
 % Purpose: correct Octave's pp-struct
 % Input  : struct ppI (Octave's version)
 % Output : struct pp (deleted first and last entry)
 % Author : A. Haumer
-% Date   : 2026-08-01
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     pp.form  =ppI.form;
     pp.breaks=ppI.breaks(1,2:size(ppI.breaks,2)-1);
@@ -205,17 +209,19 @@ function pp=corOct(ppI)
     pp.order =ppI.order;
     pp.dim   =ppI.dim;
 end
+
 function dispVal(s, v)
 % displays string s and value v
     disp(strcat(s, mat2str(v)));
 end
+
 function y=funObj(x, par)
 % -----------------------------------------------------------------------
 % Purpose: Define objective function for optimization
 % Input  : Vector of optimization parameters x, struct par
 % Output : objective function value to be minimized
 % Author : A. Haumer
-% Date   : 2026-04-10
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     par.Jsat=x(1); par.Hpar=x(2)*10000; % scaling
     y=0;
@@ -224,6 +230,7 @@ function y=funObj(x, par)
         y = y + (JApp/par.JD(kd)-1)^2;
     end
 end
+
 function mu_r=fun_mu_r(J, H, mu_ri)
 % -----------------------------------------------------------------------
 % Purpose: Calculate mu_r from J and H
@@ -231,7 +238,7 @@ function mu_r=fun_mu_r(J, H, mu_ri)
 %          initial relative permeability mu_ri
 % Output : relative permeability mu_rd
 % Author : A. Haumer
-% Date   : 2026-08-01
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     mu_0=4e-7*pi;
     Heps=1e-6; % smallest field strength to protect against division by 0
@@ -241,13 +248,14 @@ function mu_r=fun_mu_r(J, H, mu_ri)
         mu_r=1+J/(mu_0*H);
     end
 end
+
 function J=app_J(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of J with smoothing spline + exp. extrapolation
 % Input  : parameter struct par, magnetic field strength H
 % Output : Polarization J
 % Author : A. Haumer
-% Date   : 2026-08-01
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     if H<par.hH1
         J=appS_J(par,H);
@@ -258,13 +266,14 @@ function J=app_J(par, H)
         J=(1-h)*appS_J(par,H) + h*appE_J(par,H);
     end
 end
+
 function mu_rd=app_mu_rd(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation mu_rd with smoothing spline + exp. extrapolation
 % Input  : parameter struct par, magnetic field strength H
 % Output : relative differential permeability mu_rd
 % Author : A. Haumer
-% Date   : 2026-08-01
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     if H<par.hH1
         mu_rd=appS_mu_rd(par,H);
@@ -275,36 +284,39 @@ function mu_rd=app_mu_rd(par, H)
         mu_rd=1+(1-h)*(appS_mu_rd(par,H)-1)+h*(appE_mu_rd(par,H)-1);
     end
 end
+
 function J=appE_J(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of J with exponential extrapolation
 % Input  : parameter struct par, magnetic field strength H
 % Output : Polarization J
 % Author : A. Haumer
-% Date   : 2026-04-10
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     J=par.JD(par.k0)+(par.Jsat-par.JD(par.k0))* ...
       (1-exp(-(H-par.HD(par.k0))/par.Hpar));
 end
+
 function mu_rd=appE_mu_rd(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of mu_rd with exponential extrapolation
 % Input  : parameter struct par, magnetic field strength H
 % Output : relative differential permeability mu_rd
 % Author : A. Haumer
-% Date   : 2026-04-10
+% Date   : 2026-08-15
 % ----------------------------------------------------------------------
     mu_0=4e-7*pi;
     mu_rd=1+(par.Jsat-par.JD(par.k0))/(mu_0*par.Hpar)* ...
           exp(-(H-par.HD(par.k0))/par.Hpar);
 end
+
 function J=appS_J(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of J with smoothing spline
 % Input  : parameter struct par, magnetic field strength H
 % Output : Polarization J
 % Author : A. Haumer
-% Date   : 2026-08-01
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     J=fnval(par.pp,H);
     % par.pp.breaks     =par.HD
@@ -315,13 +327,14 @@ function J=appS_J(par, H)
     %   par.pp.coefs(k,2)*(H-par.HD(k))^2+ ...
     %   par.pp.coefs(k,1)*(H-par.HD(k))^3;
 end
+
 function mu_rd=appS_mu_rd(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of mu_rd with smoothing spline
 % Input  : parameter struct par, magnetic field strength H
 % Output : relative differential permeability mu_rd
 % Author : A. Haumer
-% Date   : 2026-04-10
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     mu_0=4e-7*pi;
     mu_rd=1+fnval(par.dpp,H)/mu_0;
@@ -330,13 +343,14 @@ function mu_rd=appS_mu_rd(par, H)
     %          par.pp.coefs(k,2)*2*(H-par.HD(k))+ ...
     %          par.pp.coefs(k,1)*3*(H-par.HD(k))^2)/mu_0;
 end
+
 function pltRes(par)
 % -----------------------------------------------------------------------
 % Purpose: Plot results
 % Input  : parameter struct par
 % Output : figures
 % Author : A. Haumer
-% Date   : 2026-08-01
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     Hmin=min(min(par.HD),0);
     Hmax=max(max(par.HD),50000);
@@ -357,7 +371,7 @@ function pltRes(par)
     xlabel("H [A/m]"); ylabel("J [T]");
     legend('J(H)','measured','Location','southeast');
     fig1b=copyobj(fig1a, groot);
-    xlim([0 2500]);
+    xlim([0 2500]); shg;
 % mu_r(H) and mu_rd(H)
     fig2a=figure;
     plot(H, mu_r, 'b-'); hold on;
@@ -369,15 +383,16 @@ function pltRes(par)
     savLim=ylim;  ylim([0 1000]);
     legend('µ_r(H)','measured','µ_r_d(H)','measured','Location','northeast');
     fig2b=copyobj(fig2a, groot);
-    ylim(savLim); xlim([0 1000]);
+    ylim(savLim); xlim([0 1000]); shg;
 end
+
 function savPar(par)
 % -----------------------------------------------------------------------
 % Purpose: Save parameters to file for copy-paste to Modelica
 % Input  : parameter struct par
 % Output : file "Par_"par.material".txt"
 % Author : A. Haumer
-% Date   : 2026-08-01
+% Date   : 2026-08-15
 % -----------------------------------------------------------------------
     fileName=['Par_' par.material '.txt'];
     fID=fopen(fileName,'w');
