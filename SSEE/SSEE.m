@@ -11,7 +11,7 @@ function par=SSEE(material, varargin)
 % Output:  struct par with parameters
 % For information on contents of par see function savPar.
 % Additional (not used in savPar):
-%   dpp (struct of differentiated splines), mu_rD and mu_rdD
+%   dpp (struct of differentiated splines), mu_rD
 %   H, J, B and mu_rMax at inflection point of J(H)
 % Author : A. Haumer
 % Date   : 2026-08-15
@@ -76,7 +76,6 @@ function par=SSEE(material, varargin)
     par.dpp=fnder(par.pp);
     par.mu_ri=1+par.pp.coefs(1,3)/mu_0; dispVal("µ_ri=", par.mu_ri);
     for kp=1:length(par.HD)
-        par.mu_rdD(kp,1)=1+fnval(par.dpp, par.HD(kp))/mu_0;
         par.mu_rD(kp,1) =fun_mu_r(par.JD(kp),par.HD(kp),par.mu_ri);
     end
 % correct all constant coefficients: shift characteristic to hit origin
@@ -367,36 +366,34 @@ function pltRes(par)
         mu_r(kp) =fun_mu_r(J(kp),H(kp),par.mu_ri);
     end
 % J(H)
-    fig1a=figure;
+    figure;
     semilogx(H(2:Np), J(2:Np), 'b-'); hold on;
     semilogx(par.HD(2:ND), par.JD(2:ND), 'ro');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("J [T]");
     legend('J(H)','measured','Location','southeast');
-    fig1b=figure;
+    figure;
     plot(H, J, 'b-'); hold on;
     plot(par.HD, par.JD, 'ro');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("J [T]");
-    legend('J(H)','measured','Location','southeast');
+    legend('J(H)','measured','Location','southeast','AutoUpdate','off');
     xlim([0 2000]);
 % mu_r(H) and mu_rd(H)
-    fig2a=figure;
+    figure;
     loglog(H(2:Np), mu_r(2:Np), 'b-'); hold on;
     loglog(par.HD(2:ND), par.mu_rD(2:ND), 'ro');
     loglog(H(2:Np), mu_rd(2:Np), 'k--');
-    loglog(par.HD(2:ND), par.mu_rdD(2:ND), 'mo');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("µ_r");
-    legend('µ_r(H)','measured','µ_r_d(H)','measured','Location','northeast');
-    fig2b=figure;
+    legend('µ_r(H)','measured','µ_r_d(H)','Location','northeast');
+    figure;
     plot(H, mu_r, 'b-'); hold on;
     plot(par.HD, par.mu_rD, 'ro');
     plot(H, mu_rd, 'k--');
-    plot(par.HD, par.mu_rdD, 'mo');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("µ_r");
-    legend('µ_r(H)','measured','µ_r_d(H)','measured','Location','northeast');
+    legend('µ_r(H)','measured','µ_r_d(H)','Location','northeast','AutoUpdate','off');
     xlim([0 500]);
 end
 
@@ -477,4 +474,3 @@ function savPar(par)
     end
     fclose(fID);
 end
-
