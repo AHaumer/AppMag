@@ -17,7 +17,7 @@ function par=SSEE(material, varargin)
 % -----------------------------------------------------------------------
 % handling of optional input arguments
     fT='ods';
-    p =0.005; H0=2000;  
+    p =0.005; H0=2000;
     H1= 5000; H2=20000;
     if nargin>=2
         fT=varargin{1};
@@ -101,6 +101,11 @@ function par=SSEE(material, varargin)
              (par.Jsat-par.JD(par.k0)));
 % plot and save result
     pltRes(par);
+% show inflection point of J(H)
+    choice=menu('Inflection point present?','Yes','No');
+    if choice==1
+        Hip=SSIP(par);
+    end
 % Octave shows additional points at the beginning and at the end!
     if isOctave
         par.pp=corOct(par.pp); par.dpp=corOct(par.dpp);
@@ -211,7 +216,7 @@ function y=funObj(x, par)
     par.Jsat=x(1); par.Hpar=x(2)*10000; % scaling
     y=0;
     for kd = par.k0:length(par.HD)
-        JApp=funAppE_J(par, par.HD(kd));
+        JApp=appE_J(par, par.HD(kd));
         y = y + (JApp/par.JD(kd)-1)^2;
     end
 end
@@ -232,7 +237,7 @@ function mu_r=fun_mu_r(J, H, mu_ri)
         mu_r=1+J/(mu_0*H);
     end
 end
-function J=funApp_J(par, H)
+function J=app_J(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of J with smoothing spline + exp. extrapolation
 % Input  : parameter struct par, magnetic field strength H
@@ -241,15 +246,15 @@ function J=funApp_J(par, H)
 % Date   : 2026-08-01
 % -----------------------------------------------------------------------
     if H<par.hH1
-        J=funAppS_J(par,H);
+        J=appS_J(par,H);
     elseif H>par.hH2
-        J=funAppE_J(par,H);
+        J=appE_J(par,H);
     else
         h=(H-par.hH1)/(par.hH2-par.hH1);
-        J=(1-h)*funAppS_J(par,H) + h*funAppE_J(par,H);
+        J=(1-h)*appS_J(par,H) + h*appE_J(par,H);
     end
 end
-function mu_rd=funApp_mu_rd(par, H)
+function mu_rd=app_mu_rd(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation mu_rd with smoothing spline + exp. extrapolation
 % Input  : parameter struct par, magnetic field strength H
@@ -258,15 +263,15 @@ function mu_rd=funApp_mu_rd(par, H)
 % Date   : 2026-08-01
 % -----------------------------------------------------------------------
     if H<par.hH1
-        mu_rd=funAppS_mu_rd(par,H);
+        mu_rd=appS_mu_rd(par,H);
     elseif H>par.hH2
-        mu_rd=funAppE_mu_rd(par,H);
+        mu_rd=appE_mu_rd(par,H);
     else
         h=(H-par.hH1)/(par.hH2-par.hH1);
-        mu_rd=1+(1-h)*(funAppS_mu_rd(par,H)-1)+h*(funAppE_mu_rd(par,H)-1);
+        mu_rd=1+(1-h)*(appS_mu_rd(par,H)-1)+h*(appE_mu_rd(par,H)-1);
     end
 end
-function J=funAppE_J(par, H)
+function J=appE_J(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of J with exponential extrapolation
 % Input  : parameter struct par, magnetic field strength H
@@ -277,7 +282,7 @@ function J=funAppE_J(par, H)
     J=par.JD(par.k0)+(par.Jsat-par.JD(par.k0))* ...
       (1-exp(-(H-par.HD(par.k0))/par.Hpar));
 end
-function mu_rd=funAppE_mu_rd(par, H)
+function mu_rd=appE_mu_rd(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of mu_rd with exponential extrapolation
 % Input  : parameter struct par, magnetic field strength H
@@ -289,7 +294,7 @@ function mu_rd=funAppE_mu_rd(par, H)
     mu_rd=1+(par.Jsat-par.JD(par.k0))/(mu_0*par.Hpar)* ...
           exp(-(H-par.HD(par.k0))/par.Hpar);
 end
-function J=funAppS_J(par, H)
+function J=appS_J(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of J with smoothing spline
 % Input  : parameter struct par, magnetic field strength H
@@ -306,7 +311,7 @@ function J=funAppS_J(par, H)
     %   par.pp.coefs(k,2)*(H-par.HD(k))^2+ ...
     %   par.pp.coefs(k,1)*(H-par.HD(k))^3;
 end
-function mu_rd=funAppS_mu_rd(par, H)
+function mu_rd=appS_mu_rd(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of mu_rd with smoothing spline
 % Input  : parameter struct par, magnetic field strength H
@@ -336,8 +341,8 @@ function pltRes(par)
 % pre-allocate result vectors to increase speed
     J=zeros(Np,1); mu_r=zeros(Np,1); mu_rd=zeros(Np,1);
     for kp=1:Np
-        J(kp)=funApp_J(par, H(kp));
-        mu_rd(kp)=funApp_mu_rd(par, H(kp));
+        J(kp)=app_J(par, H(kp));
+        mu_rd(kp)=app_mu_rd(par, H(kp));
         mu_r(kp) =fun_mu_r(J(kp),H(kp),par.mu_ri);
     end
 % J(H)
@@ -438,4 +443,22 @@ function savPar(par)
         kB=kE+1; kE=min(kB+6, N);
     end
     fclose(fID);
+end
+function Hip=SSIP(par)
+% -----------------------------------------------------------------------
+% Purpose: calculate Inflection Point of J(H)
+%          defines by mu_rd-mu_r=d mu_r/dt = 0
+% Input  : struct par with parameters from SSEE
+% Output:  H at inflection point
+% Author : A. Haumer
+% Date   : 2026-08-01
+% -----------------------------------------------------------------------
+if exist("OCTAVE_VERSION","builtin")>0
+    pkg load splines;
+end
+    fun = @(H)(fnval(par.pp,H)/H-fnval(par.dpp,H));
+    Hip=fzero(fun,[0.1*par.HD(2) par.HD(par.k0)]);
+    Jip=app_J(par, Hip);
+    dispVal("H_ip=",Hip);
+    dispVal("J_ip=",Jip);
 end
