@@ -71,37 +71,40 @@ function par=SSEE(material, varargin)
 % smoothed spline interpolation
     par.pp=csaps(par.HD,par.JD,p);
     par.dpp=fnder(par.pp);
-    par.mu_ri=1+par.pp.coefs(1,3)/mu_0; dispVal("µ_ri=", par.mu_ri);
+% correct all constant coefficients: shift characteristic to hit origin!
+% calculate mu_ri and mu_r (of raw data)
+    if isOctave
+        dJ=par.pp.coefs(2,4)-par.JD(1);
+        par.mu_ri=1+par.pp.coefs(2,3)/mu_0; dispVal("µ_ri=", par.mu_ri);
+    else
+        dJ=par.pp.coefs(1,4)-par.JD(1);
+        par.mu_ri=1+par.pp.coefs(1,3)/mu_0; dispVal("µ_ri=", par.mu_ri);
+    end
+    par.pp.coefs(:,4)=par.pp.coefs(:,4)-ones(size(par.pp.coefs,1),1)*dJ;
     for kp=1:length(par.HD)
         par.mu_rD(kp,1) =fun_mu_r(par.JD(kp),par.HD(kp),par.mu_ri);
     end
-% correct all constant coefficients: shift characteristic to hit origin
-    if isOctave
-        dJ=par.pp.coefs(2,4)-par.JD(1);
-    else
-        dJ=par.pp.coefs(1,4)-par.JD(1);
-    end
-    par.pp.coefs(:,4)=par.pp.coefs(:,4)-ones(size(par.pp.coefs,1),1)*dJ;
-% search for grid point near H0 (be careful specifying H0!)
-    par.k0=find(abs(H0-par.HD)<0.01*H0);
-    par.hH1=H1;         par.hH2=H2;
+% search for grid point near H0
+    [~, par.k0]=min(abs(par.HD-H0));
+    par.hH1=H1; par.hH2=H2;
 % determine optimal exponential extrapolation
     obj = @(x)funObjEE(x, par);
-    x0 = [2, 1]; % scaling x=[Jsat, Hpar/10000]
-    [x,fval] = fminunc(obj, x0);
+    x0=[2, 1]; % scaling x=[Jsat, Hpar/10000]
+    [x,fval]=fminunc(obj, x0);
     dispVal("fminunc: fval=",fval);
     par.Jsat=x(1);       dispVal("Jsat=", par.Jsat);
     par.Hpar=x(2)*10000; dispVal("Hpar=", par.Hpar);
 % Hsat to approach "near" Jsat (with 1 ppm deviation)
     par.Hsat=par.HD(par.k0)-par.Hpar*log(1e-6*par.Jsat/ ...
-             (par.Jsat-par.JD(par.k0)));
+        (par.Jsat-par.JD(par.k0)));
 % plot and save result
     pltRes(par);
 % show inflection point of J(H): mu_rd - mu_r = d mu_r/dH * H = 0
-    choice=menu('Is the inflection point of J(H) = the maximum of mu_r present ?','yes','no');
+    q='Is the inflection point of J(H) = the maximum of mu_r present ?';
+    choice=menu(q,'yes','no');
     if choice==1
         fun = @(H)(fnval(par.pp,H)/H-fnval(par.dpp,H));
-        par.H_muMax=fzero(fun,[0.1*par.HD(2) par.HD(par.k0)]);
+        par.H_muMax=fzero(fun,[0.1*par.HD(2),par.HD(par.k0)]);
         par.J_muMax=app_J(par, par.H_muMax);
         par.B_muMax=mu_0*par.H_muMax+par.J_muMax;
         par.mu_rMax=par.B_muMax/(mu_0*par.H_muMax);
@@ -160,7 +163,7 @@ function par=read_txt(fileName)
 % Author : A. Haumer
 % Date   : 2026-08-15
 % -----------------------------------------------------------------------
-% get additional scalar parameters to save them later to the parameter file
+% get additional scalar parameters to save them later to parameter file
     fID=fopen(fileName); % skip first 2 lines #1 and # type
     fgetl(fID); fgetl(fID);
     line=fgetl(fID); par.vRef=str2double(line(strfind(line,"=")+1:end));
@@ -169,8 +172,9 @@ function par=read_txt(fileName)
     line=fgetl(fID); par.dens=str2double(line(strfind(line,"=")+1:end));
     fclose(fID);
 % raw data arrays J and H (ensure that all lines use the same delimiter!)
+    firstLine=7; % Line where table starts
     if exist("OCTAVE_VERSION","builtin")>0
-        RD=dlmread(fileName,'\t',7,0);
+        RD=dlmread(fileName,'\t',firstLine,0);
     else
         RD=readmatrix(fileName);
     end
@@ -195,15 +199,17 @@ function par=read_xls(fileName, material)
 % Author : A. Haumer
 % Date   : 2026-08-15
 % -----------------------------------------------------------------------
+    firstRow=8; % Row where table starts
     if exist("OCTAVE_VERSION","builtin")>0
-% get additional scalar parameters to save them later to the parameter file
+% get additional scalar parameters to save them later to parameter file
         par.vRef=xlsread(fileName,material,'B2:B2');
         par.BRef=xlsread(fileName,material,'B3:B3');
         par.fRef=xlsread(fileName,material,'B4:B4');
         par.dens=xlsread(fileName,material,'B5:B5');
         n=8-1+   xlsread(fileName,material,'B6:B6');
 % raw data arrays J and H
-        RD=xlsread(fileName,material,['A8:B' mat2str(n)]);
+        RD=xlsread(fileName,material, ...
+            ['A' mat2str(firstRow) ':B' mat2str(n)]);
     else
 % get additional scalar parameters to save them later to the parameter file
         par.vRef=readmatrix(fileName,'Sheet',material,'Range','B2:B2');
@@ -212,7 +218,8 @@ function par=read_xls(fileName, material)
         par.dens=readmatrix(fileName,'Sheet',material,'Range','B5:B5');
         n=8-1+   readmatrix(fileName,'Sheet',material,'Range','B6:B6');
 % raw data arrays J and H
-        RD=readmatrix(fileName,'Sheet',material,'Range',['A8:B' mat2str(n)]);
+        RD=readmatrix(fileName,'Sheet',material, ...
+            'Range',['A' mat2str(firstRow) ':B' mat2str(n)]);
     end
     par.HD=RD(:,2); par.JD=RD(:,1);
     dispVal("ods/xls: Lines of raw data=", length(par.HD));
@@ -324,6 +331,7 @@ function mu_rd=appS_mu_rd(par, H)
     mu_0=4e-7*pi;
     mu_rd=1+fnval(par.dpp,H)/mu_0;
     % k=find(par.HD(1:end-1)<=H & par.HD(2:end)>H, 1);
+    % differentiating the cubic polynomial
     % mu_rd=1+(par.pp.coefs(k,3)+ ...
     %          par.pp.coefs(k,2)*2*(H-par.HD(k))+ ...
     %          par.pp.coefs(k,1)*3*(H-par.HD(k))^2)/mu_0;
@@ -362,7 +370,7 @@ function pltRes(par)
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("J [T]");
     legend('J(H)','measured','Location','southeast','AutoUpdate','off');
-    xlim([0 2000]);
+    xlim([0 1000]);
 % mu_r(H) and mu_rd(H)
     figure;
     loglog(H(2:Np), mu_r(2:Np), 'b-'); hold on;
