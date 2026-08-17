@@ -1,4 +1,4 @@
-function pltRes(par)
+function pltResSSEE(par)
 % -----------------------------------------------------------------------
 % Purpose: Plot results
 % Input  : parameter struct par
@@ -14,8 +14,8 @@ function pltRes(par)
 % pre-allocate result vectors to increase speed
     J=zeros(Np,1); mu_r=zeros(Np,1); mu_rd=zeros(Np,1);
     for kp=1:Np
-        J(kp)=app_J(par, H(kp));
-        mu_rd(kp)=app_mu_rd(par, H(kp));
+        J(kp)=appSSEE_J(par, H(kp));
+        mu_rd(kp)=appSSEE_mu_rd(par, H(kp));
         mu_r(kp) =fun_mu_r(J(kp),H(kp),par.mu_ri);
     end
 % J(H)

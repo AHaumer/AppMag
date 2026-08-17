@@ -1,4 +1,4 @@
-function mu_rd=appE_mu_rd(par, H)
+function mu_rd=appEE_mu_rd(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of mu_rd with exponential extrapolation
 % Input  : parameter struct par, magnetic field strength H

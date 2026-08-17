@@ -1,4 +1,4 @@
-function mu_rd=appS_mu_rd(par, H)
+function mu_rd=appSS_mu_rd(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of mu_rd with smoothing spline
 % Input  : parameter struct par, magnetic field strength H

@@ -1,4 +1,4 @@
-function savPar(par)
+function savParSSEE(par)
 % -----------------------------------------------------------------------
 % Purpose: Save parameters to file for copy-paste to Modelica
 % Input  : parameter struct par

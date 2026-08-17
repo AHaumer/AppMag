@@ -1,4 +1,4 @@
-function J=appS_J(par, H)
+function J=appSS_J(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of J with smoothing spline
 % Input  : parameter struct par, magnetic field strength H

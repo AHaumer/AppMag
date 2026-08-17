@@ -9,7 +9,7 @@ function y=funObjEE(x, par)
     par.Jsat=x(1); par.Hpar=x(2)*10000; % scaling
     y=0;
     for kd = par.k0:length(par.HD)
-        JApp=appE_J(par, par.HD(kd));
+        JApp=appEE_J(par, par.HD(kd));
         y = y + (JApp/par.JD(kd)-1)^2;
     end
 end

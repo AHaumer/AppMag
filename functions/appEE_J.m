@@ -1,4 +1,4 @@
-function J=appE_J(par, H)
+function J=appEE_J(par, H)
 % -----------------------------------------------------------------------
 % Purpose: Approximation of J with exponential extrapolation
 % Input  : parameter struct par, magnetic field strength H

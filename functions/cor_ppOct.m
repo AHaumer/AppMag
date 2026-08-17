@@ -1,4 +1,4 @@
-function pp=corOct(ppI)
+function pp=cor_ppOct(ppI)
 % -----------------------------------------------------------------------
 % Purpose: correct Octave's pp-struct
 % Input  : struct ppI (Octave's version)
