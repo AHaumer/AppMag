@@ -68,9 +68,6 @@ function par=SSEE(material, varargin)
         end
     end
     par.material=material;
-% search for grid point near H0 (be careful specifying H0!)
-    par.k0=find(abs(H0-par.HD)<0.01*H0);
-    par.hH1=H1;         par.hH2=H2;
 % smoothed spline interpolation
     par.pp=csaps(par.HD,par.JD,p);
     par.dpp=fnder(par.pp);
@@ -85,8 +82,11 @@ function par=SSEE(material, varargin)
         dJ=par.pp.coefs(1,4)-par.JD(1);
     end
     par.pp.coefs(:,4)=par.pp.coefs(:,4)-ones(size(par.pp.coefs,1),1)*dJ;
+% search for grid point near H0 (be careful specifying H0!)
+    par.k0=find(abs(H0-par.HD)<0.01*H0);
+    par.hH1=H1;         par.hH2=H2;
 % determine optimal exponential extrapolation
-    obj = @(x)funObj(x, par);
+    obj = @(x)funObjEE(x, par);
     x0 = [2, 1]; % scaling x=[Jsat, Hpar/10000]
     [x,fval] = fminunc(obj, x0);
     dispVal("fminunc: fval=",fval);
@@ -218,7 +218,7 @@ function par=read_xls(fileName, material)
     dispVal("ods/xls: Lines of raw data=", length(par.HD));
 end
 
-function y=funObj(x, par)
+function y=funObjEE(x, par)
 % -----------------------------------------------------------------------
 % Purpose: objective function for optimization of exp.extrapolation
 % Input  : Vector of optimization parameters x, struct par

@@ -56,7 +56,14 @@ function par=Roschke(material, varargin)
     for kp=1:length(par.HD)
         par.mu_rD(kp,1) =fun_mu_r(par.JD(kp),par.HD(kp),par.mu_ri);
     end
-% show inflection point of J(H): mu_rd - mu_r = d mu_r/dH * H = 0
+% correct all constant coefficients: shift characteristic to hit origin
+    if isOctave
+        dJ=par.pp.coefs(2,4)-par.JD(1);
+    else
+        dJ=par.pp.coefs(1,4)-par.JD(1);
+    end
+    par.pp.coefs(:,4)=par.pp.coefs(:,4)-ones(size(par.pp.coefs,1),1)*dJ;
+% inflection point of J(H): mu_rd - mu_r = d mu_r/dH * H = 0
     fun = @(H)(fnval(pp,H)/H-fnval(dpp,H));
     par.H_muMax=fzero(fun,[0.1*par.HD(2) par.HD(end)]);
     par.J_muMax=fnval(pp, par.H_muMax);
@@ -66,7 +73,17 @@ function par=Roschke(material, varargin)
     dispVal('H_muMax=',par.H_muMax);
     dispVal('B_muMax=',par.B_muMax);
     dispVal('mu_rMax=',par.mu_rMax);
-% % determine optimal Roschke parameters
+% determine Jsat with exponential extrapolation
+    H0=2000; par.k0=find(abs(H0-par.HD)<0.01*H0);
+    obj = @(x)funObjEE(x, par);
+    x0 = [2, 1]; % scaling x=[Jsat, Hpar/10000]
+    [x,fval] = fminunc(obj, x0);
+    dispVal("fminunc: fval=",fval);
+    par.Jsat=x(1);       dispVal("Jsat=", par.Jsat);
+%   par.Hpar=x(2)*10000; dispVal("Hpar=", par.Hpar);
+% determine optimal Roschke parameters
+% initial values
+    par.ca=20000; par.cb=4; par.n=12;
 %     obj = @(x)funObj(x, par);
 %     x0 = [2, 1]; % scaling x=[Jsat, Hpar/10000]
 %     [x,fval] = fminunc(obj, x0);
@@ -176,7 +193,7 @@ function par=read_xls(fileName, material)
     dispVal("ods/xls: Lines of raw data=", length(par.HD));
 end
 
-function y=funObj(x, par)
+function y=funObjEE(x, par)
 % -----------------------------------------------------------------------
 % Purpose: objective function for optimization of exp.extrapolation
 % Input  : Vector of optimization parameters x, struct par
@@ -187,9 +204,22 @@ function y=funObj(x, par)
     par.Jsat=x(1); par.Hpar=x(2)*10000; % scaling
     y=0;
     for kd = par.k0:length(par.HD)
-        JApp=appE_J(par, par.HD(kd));
+        JApp=par.JD(par.k0)+(par.Jsat-par.JD(par.k0))* ...
+            (1-exp(-(par.HD(kd)-par.HD(par.k0))/par.Hpar));
         y = y + (JApp/par.JD(kd)-1)^2;
     end
+end
+
+function mu_r=app_mu_r(par, B)
+% -----------------------------------------------------------------------
+% Purpose: Calculate relative permeability (Roschke) from flux dens. B
+% Input  : parameter struct par
+% Output : mu_r
+% Author : A. Haumer
+% Date   : 2026-08-15
+% -----------------------------------------------------------------------
+    mu_r=1+(par.mu_ri-1+par.ca*B/par.B_muMax)/ ...
+        (1+par.cb*B/par.B_muMax+(B/par.B_muMax)^par.n);
 end
 
 function pltRes(par)
