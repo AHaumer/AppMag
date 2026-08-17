@@ -237,7 +237,7 @@ function mu_r=fun_mu_r(J, H, mu_ri)
 % Purpose: Calculate mu_r from J and H
 % Input  : polarization J, magnetic field strength H,
 %          initial relative permeability mu_ri
-% Output : relative permeability mu_rd
+% Output : relative permeability mu_r
 % Author : A. Haumer
 % Date   : 2026-08-15
 % -----------------------------------------------------------------------
