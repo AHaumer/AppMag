@@ -1,5 +1,5 @@
 within ;
-package SoftMagnetic "Base data records"
+package ShowCharacteristic "Base data records"
   import Modelica.Units.SI;
   import Modelica.Constants.mu_0;
 
@@ -7,14 +7,14 @@ package SoftMagnetic "Base data records"
     extends Modelica.Icons.ExamplesPackage;
     model ShowSSEE "Investigate magnetic characteristic"
       extends Modelica.Icons.Example;
-      import SoftMagnetic.SSEE.Functions.app_J;
-      import SoftMagnetic.SSEE.Functions.app_mu_r;
-      import SoftMagnetic.SSEE.Functions.app_mu_rd;
-      parameter SSEE.M330_50A                                    material
+      import ShowCharacteristic.SSEE.Functions.app_J;
+      import ShowCharacteristic.SSEE.Functions.app_mu_r;
+      import ShowCharacteristic.SSEE.Functions.app_mu_rd;
+      parameter SSEE.M330_50A material
         annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
       constant SI.Time Tend=1;
-      parameter SI.MagneticFieldStrength Hmin=0 "Start of H";
-      parameter SI.MagneticFieldStrength Hmax=50000 "End of H";
+      parameter SI.MagneticFieldStrength Hmin=-1000 "Start of H";
+      parameter SI.MagneticFieldStrength Hmax= 1000 "End of H";
       SI.MagneticFieldStrength H=Hmin + (Hmax - Hmin)*time/Tend "Driving field strength";
       parameter SI.Area wA=1 "Number of turns x area";
       SI.MagneticPolarization J=app_J(H, material) "Approx. polarization";
@@ -46,9 +46,9 @@ magnetic flux linkage <code>psi</code> and induced voltage <code>v</code> are ca
         input SI.MagneticFluxDensity B
           "Flux density in ferromagnetic flux tube element";
         //Material specific parameter set:
-        input SoftMagnetic.Roschke.BaseData material "Material data";
-        output SI.RelativePermeability mu_r=1 + (material.mu_i - 1 +
-            material.c_a*B_N)/(1 + material.c_b*B_N + B_N^material.n)
+        input ShowCharacteristic.Roschke.BaseData material "Material data";
+        output SI.RelativePermeability mu_r=1 +
+          (material.mu_i - 1 + material.c_a*B_N)/(1 + material.c_b*B_N + B_N^material.n)
           "Relative magnetic permeability of ferromagnetic flux tube element";
       protected
         Real B_N=abs(B/material.B_myMax)
@@ -95,7 +95,7 @@ The parameters needed for <a href=\"modelica://Modelica.Magnetic.FluxTubes.Mater
       extends Modelica.Icons.MaterialPropertiesPackage;
 
       record M330_50A "M330-50A (1.0809) @ 50Hz complete core"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="M330-50A",
           mu_i=500,
           B_myMax=0.7,
@@ -120,7 +120,7 @@ Direct comparison with other material is therefore not possible.
       end M330_50A;
 
       record M350_50A "M350-50A (1.0810) @ 50Hz"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="M350-50A",
           mu_i=1210,
           B_myMax=1.16,
@@ -140,7 +140,7 @@ Measurement: Epstein frame
       end M350_50A;
 
       record M530_50A "M530-50A (1.0813) @ 50Hz"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="M530-50A",
           mu_i=2120,
           B_myMax=1.25,
@@ -160,7 +160,7 @@ Measurement: Epstein frame
       end M530_50A;
 
       record M700_100A "M700-100A (1.0826) @ 50Hz"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="M700-100A",
           mu_i=1120,
           B_myMax=1.2,
@@ -180,7 +180,7 @@ Measurement: Epstein frame
       end M700_100A;
 
       record M940_100A "M940-100A @ 50Hz"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="M940-100A",
           mu_i=680,
           B_myMax=1.26,
@@ -208,7 +208,7 @@ Please refer to the description of  the enclosing package <a href=\"modelica://M
     package PureIron "Pure iron"
       extends Modelica.Icons.MaterialPropertiesPackage;
       record RFe80 "Hyperm 0 (RFe80)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="RFe80",
           mu_i=123,
           B_myMax=1.27,
@@ -227,7 +227,7 @@ Source of B(H) characteristics: Product catalogue <em>Magnequench</em>, 2000
       end RFe80;
 
       record VacoferS2 "VACOFER S2 (99.95% Fe)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="VACOFER S2",
           mu_i=2666,
           B_myMax=1.15,
@@ -252,7 +252,7 @@ Please refer to the description of  the enclosing package <a href=\"modelica://M
       extends Modelica.Icons.MaterialPropertiesPackage;
 
       record Vacoflux50 "VACOFLUX 50 (50% CoFe)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="VACOFLUX 50",
           mu_i=3850,
           B_myMax=1.75,
@@ -274,7 +274,7 @@ Source of B(H) characteristics: VACUUMSCHMELZE GmbH &amp; Co. KG, Germany
     package NickelIron "Nickel iron"
       extends Modelica.Icons.MaterialPropertiesPackage;
       record MuMetall "Mu-metal (77% NiFe)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="Mu-metal",
           mu_i=27300,
           B_myMax=0.46,
@@ -296,7 +296,7 @@ Source of B(H) characteristics:
       end MuMetall;
 
       record Permenorm3601K3 "PERMENORM 3601 K3 (36% NiFe)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="PERMENORM 3601 K3",
           mu_i=3000,
           B_myMax=0.67,
@@ -322,7 +322,7 @@ Source of B(H) characteristics:
       extends Modelica.Icons.MaterialPropertiesPackage;
 
       record AISI_1008 "AISI 1008 (1.0204)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="AISI 1008",
           mu_i=200,
           B_myMax=1.17,
@@ -338,7 +338,7 @@ Please refer to the description of  the enclosing package <a href=\"modelica://M
       end AISI_1008;
 
       record AISI_12L14 "AISI 12L14 (1.0718)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="AISI 12L14",
           mu_i=10,
           B_myMax=0.94,
@@ -354,7 +354,7 @@ Please refer to the description of  the enclosing package <a href=\"modelica://M
       end AISI_12L14;
 
       record DC01 "DC01 (1.0330, previously St2)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="DC01",
           mu_i=5,
           B_myMax=1.1,
@@ -370,7 +370,7 @@ Please refer to the description of  the enclosing package <a href=\"modelica://M
       end DC01;
 
       record DC03 "DC03 (1.0347, previously St3)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="DC03",
           mu_i=0,
           B_myMax=1.05,
@@ -386,7 +386,7 @@ Please refer to the description of  the enclosing package <a href=\"modelica://M
       end DC03;
 
       record Steel_9SMn28K "9SMn28K (1.0715)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="9SMn28K",
           mu_i=500,
           B_myMax=1.036,
@@ -402,7 +402,7 @@ Please refer to the description of  the enclosing package <a href=\"modelica://M
       end Steel_9SMn28K;
 
       record Steel_9SMnPb28 "9SMnPb28 (1.0718)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="9SMnPb28",
           mu_i=400,
           B_myMax=1.488,
@@ -418,7 +418,7 @@ Please refer to the description of  the enclosing package <a href=\"modelica://M
       end Steel_9SMnPb28;
 
       record X6Cr17 "X6Cr17 (1.4016)"
-        extends SoftMagnetic.Roschke.BaseData(
+        extends ShowCharacteristic.Roschke.BaseData(
           label="X6Cr17",
           mu_i=274,
           B_myMax=1.1,
@@ -473,8 +473,8 @@ Returns magnetic polarization <code>J</code> calculated from smoothing splines a
         input BaseData material "Material data";
         input Types.MagneticFieldStrengthSlope derH
           "Derivative of magnetic field strength";
-        output Types.MagneticFluxDensitySlope derJ=Modelica.Constants.mu_0
-              *(app_mu_rd(H,material) - 1)*derH "Slope of magnetic polarization";
+        output Types.MagneticFluxDensitySlope derJ=mu_0*(app_mu_rd(H,material) - 1)*derH
+          "Slope of magnetic polarization";
         annotation (Documentation(info="<html>
 <p>
 Returns slope of magnetic polarization <code>J</code> calculated from susceptibility.
@@ -487,7 +487,7 @@ Returns slope of magnetic polarization <code>J</code> calculated from susceptibi
         input SI.MagneticFieldStrength H "Magnetic field strength";
         input BaseData material "Material data";
         output SI.RelativePermeability mu_r=if abs(H)<Heps then material.mu_ri
-          else 1 + app_J(H, material)/(Modelica.Constants.mu_0*H) "Relative permeability";
+          else 1 + app_J(H, material)/(mu_0*H) "Relative permeability";
       protected
         SI.MagneticFieldStrength Heps=1e-6 "Below Heps mu_ri is returned";
         annotation (derivative(noDerivative=material)=der_mu_r,
@@ -560,6 +560,7 @@ an asymptote at saturation polarization <code>Jsat</code>.
 
         function app_J_SS "Approximation J(H) Smoothing Splines"
           extends Modelica.Icons.Function;
+          import ShowCharacteristic.SSEE.Functions.Internal.findInterval;
           input SI.MagneticFieldStrength H "Magnetic field strength";
           input BaseData material "Material data";
           output SI.MagneticPolarization J "Magnetic polarization";
@@ -570,7 +571,7 @@ an asymptote at saturation polarization <code>Jsat</code>.
           Real c1[:]=material.c1;
           Real c2[:]=material.c2;
           Real c3[:]=material.c3;
-          Integer k=SoftMagnetic.SSEE.Functions.Internal.findInterval(abs(H), HD);
+          Integer k=findInterval(abs(H), HD);
           SI.MagneticFieldStrength dH;
         algorithm
           if k<=0 then
@@ -610,6 +611,7 @@ Returns magnetic polarization <code>J</code> calculated from exponential extrapo
 
         function app_chi_d_SS "Approximation chi_d(H) Smoothing Splines"
           extends Modelica.Icons.Function;
+          import ShowCharacteristic.SSEE.Functions.Internal.findInterval;
           input SI.MagneticFieldStrength H "Magnetic field strength";
           input BaseData material "Material data";
           output SI.MagneticSusceptibility chi_d "Differential susceptibility";
@@ -619,17 +621,16 @@ Returns magnetic polarization <code>J</code> calculated from exponential extrapo
           Real c1[:]=material.c1;
           Real c2[:]=material.c2;
           Real c3[:]=material.c3;
-          Integer k=SoftMagnetic.SSEE.Functions.Internal.findInterval(abs(H), HD);
+          Integer k=findInterval(abs(H), HD);
           SI.MagneticFieldStrength dH;
         algorithm
           if k<=0 then
             chi_d := c1[1]/Modelica.Constants.mu_0;
           elseif k>=N then
             dH:=HD[N] - HD[N - 1];
-            chi_d := (((3*c3[N - 1]*dH + 2*c2[N - 1]))*dH + c1[N - 1])/Modelica.Constants.mu_0;
+            chi_d := (((3*c3[N - 1]*dH + 2*c2[N - 1]))*dH + c1[N - 1])/mu_0;
           else
-            chi_d := ((3*c3[k]*(abs(H) - HD[k]) + 2*c2[k])*(abs(H) - HD[k]) + c1[k])/
-              Modelica.Constants.mu_0;
+            chi_d := ((3*c3[k]*(abs(H) - HD[k]) + 2*c2[k])*(abs(H) - HD[k]) + c1[k])/mu_0;
           end if;
           annotation (Documentation(info="<html>
 <p>
@@ -1745,4 +1746,4 @@ Many thanks to that company for allowing us to use this data!
           final unit="V/m2");
   end Types;
   annotation (uses(Modelica(version="4.1.0")));
-end SoftMagnetic;
+end ShowCharacteristic;
