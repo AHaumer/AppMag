@@ -23,7 +23,7 @@ Measured data have to include the rise of mu_r from mu_ri to mu_rMax, i.e. the i
 Copy data set(s) together with the approximation function into a working directory.
 There is a growing collection of functions that can be called in Octave or Matlab.
 It is planned to provide different methods of approximation.
-First, Smoothing Splines with Exponential Extrapolation [SSEE](https://github.com/AHaumer/AppMag/tree/main/SSEE) are implemented.
+First, Smoothing Splines with Exponential Extrapolation [SSEE](docs/SSEE.md) are implemented.
 
 ## Acknowledgements
 Raw data sets were provided by [VoestAlpine](https://www.voestalpine.com/isovac/en/Downloads/Datasheets).

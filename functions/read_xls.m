@@ -1,0 +1,42 @@
+function par=read_xls(fileName, material)
+% -----------------------------------------------------------------------
+% Purpose: read raw data from spreadsheet
+% Input  : material -> -> file with raw data fileName / sheet material
+% Output : struct par
+% Mandatory structure of spreadsheet:
+% 1 material name = sheet
+% 2 vRef
+% 3 BRef
+% 4 fRef
+% 5 dens
+% 6 N = count of data lines
+% 7 header: J [T] H [A/m]
+% 8         0     0
+% Author : A. Haumer
+% Date   : 2026-08-15
+% -----------------------------------------------------------------------
+    firstRow=8; % Row where table starts
+    if exist("OCTAVE_VERSION","builtin")>0
+% get additional scalar parameters to save them later to parameter file
+        par.vRef=xlsread(fileName,material,'B2:B2');
+        par.BRef=xlsread(fileName,material,'B3:B3');
+        par.fRef=xlsread(fileName,material,'B4:B4');
+        par.dens=xlsread(fileName,material,'B5:B5');
+        n=8-1+   xlsread(fileName,material,'B6:B6');
+% raw data arrays J and H
+        RD=xlsread(fileName,material, ...
+            ['A' mat2str(firstRow) ':B' mat2str(n)]);
+    else
+% get additional scalar parameters to save them later to the parameter file
+        par.vRef=readmatrix(fileName,'Sheet',material,'Range','B2:B2');
+        par.BRef=readmatrix(fileName,'Sheet',material,'Range','B3:B3');
+        par.fRef=readmatrix(fileName,'Sheet',material,'Range','B4:B4');
+        par.dens=readmatrix(fileName,'Sheet',material,'Range','B5:B5');
+        n=8-1+   readmatrix(fileName,'Sheet',material,'Range','B6:B6');
+% raw data arrays J and H
+        RD=readmatrix(fileName,'Sheet',material, ...
+            'Range',['A' mat2str(firstRow) ':B' mat2str(n)]);
+    end
+    par.HD=RD(:,2); par.JD=RD(:,1);
+    dispVal("ods/xls: Lines of raw data=", length(par.HD));
+end
