@@ -3,7 +3,10 @@ Approximation formula for magnetic characteristics according to:
 Thomas Roschke, Entwurf geregelter elektromagnischer Antriebe für Luftschütze, 
 VDI-Verlag 2000, ISBN 3-18-329321-8
 
-## Note: This is work in progress, not finished yet.
+## Note: This is work in progress.
+### It is not easy to determine optimal parameters. 
+### We do not know how parameters were calculated in the original work.
+## Please be very careful using the results!
 
 For a description of raw data see the README in the main directory.
 

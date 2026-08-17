@@ -90,8 +90,8 @@ function par=Roschke(material, varargin)
     par.ca=x(1)*10000; dispVal("ca=", par.ca);
     par.cb=x(2);       dispVal("cb=", par.cb);
     par.n =x(3);       dispVal("n =", par.n );
-% % plot and save result
-%     pltRes(par);
+% plot and save result
+    pltRes(par);
     savPar(par);
 end
 
@@ -249,17 +249,18 @@ function pltRes(par)
 % Author : A. Haumer
 % Date   : 2026-08-15
 % -----------------------------------------------------------------------
-    Hmin=min(min(par.HD),0);
-    Hmax=max(max(par.HD),50000);
+    mu_0=4e-7*pi;
+    Bmin=min(min(par.JD),0);
+    Bmax=max(max(par.JD),par.Jsat);
     Np=10000; % number of points
-    H=linspace(Hmin,Hmax,Np);
+    B=linspace(Bmin,Bmax,Np);
     ND=length(par.HD);
 % pre-allocate result vectors to increase speed
-    J=zeros(Np,1); mu_r=zeros(Np,1); mu_rd=zeros(Np,1);
+    J=zeros(Np,1); H=zeros(Np,1); mu_r=zeros(Np,1);
     for kp=1:Np
-        J(kp)=app_J(par, H(kp));
-        mu_rd(kp)=app_mu_rd(par, H(kp));
-        mu_r(kp) =fun_mu_r(J(kp),H(kp),par.mu_ri);
+        mu_r(kp)=app_mu_r(par,B(kp));
+        H(kp)=B(kp)/(mu_0*mu_r(kp));
+        J(kp)=B(kp)-mu_0*H(kp);
     end
 % J(H)
     figure;
@@ -275,21 +276,19 @@ function pltRes(par)
     xlabel("H [A/m]"); ylabel("J [T]");
     legend('J(H)','measured','Location','southeast','AutoUpdate','off');
     xlim([0 2000]);
-% mu_r(H) and mu_rd(H)
+% mu_r(H)
     figure;
     loglog(H(2:Np), mu_r(2:Np), 'b-'); hold on;
     loglog(par.HD(2:ND), par.mu_rD(2:ND), 'ro');
-    loglog(H(2:Np), mu_rd(2:Np), 'k--');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("µ_r");
-    legend('µ_r(H)','measured','µ_r_d(H)','Location','northeast');
+    legend('µ_r(H)','measured','Location','northeast');
     figure;
     plot(H, mu_r, 'b-'); hold on;
     plot(par.HD, par.mu_rD, 'ro');
-    plot(H, mu_rd, 'k--');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("µ_r");
-    legend('µ_r(H)','measured','µ_r_d(H)','Location','northeast','AutoUpdate','off');
+    legend('µ_r(H)','measured','Location','northeast','AutoUpdate','off');
     xlim([0 500]);
 end
 
