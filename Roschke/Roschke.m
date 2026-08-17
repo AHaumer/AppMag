@@ -58,11 +58,11 @@ function par=Roschke(material, varargin)
     end
 % correct all constant coefficients: shift characteristic to hit origin
     if isOctave
-        dJ=par.pp.coefs(2,4)-par.JD(1);
+        dJ=pp.coefs(2,4)-par.JD(1);
     else
-        dJ=par.pp.coefs(1,4)-par.JD(1);
+        dJ=pp.coefs(1,4)-par.JD(1);
     end
-    par.pp.coefs(:,4)=par.pp.coefs(:,4)-ones(size(par.pp.coefs,1),1)*dJ;
+    pp.coefs(:,4)=pp.coefs(:,4)-ones(size(pp.coefs,1),1)*dJ;
 % inflection point of J(H): mu_rd - mu_r = d mu_r/dH * H = 0
     fun = @(H)(fnval(pp,H)/H-fnval(dpp,H));
     par.H_muMax=fzero(fun,[0.1*par.HD(2) par.HD(end)]);
@@ -82,16 +82,17 @@ function par=Roschke(material, varargin)
     par.Jsat=x(1);       dispVal("Jsat=", par.Jsat);
 %   par.Hpar=x(2)*10000; dispVal("Hpar=", par.Hpar);
 % determine optimal Roschke parameters
-% initial values
     par.ca=20000; par.cb=4; par.n=12;
-%     obj = @(x)funObj(x, par);
-%     x0 = [2, 1]; % scaling x=[Jsat, Hpar/10000]
-%     [x,fval] = fminunc(obj, x0);
-%     dispVal("fminunc: fval=",fval);
-%     par.Jsat=x(1);       dispVal("Jsat=", par.Jsat);
-%     par.Hpar=x(2)*10000; dispVal("Hpar=", par.Hpar);
+    obj = @(x)funObj(x, par);
+    x0=[par.ca/10000, par.cb, par.n]; % scaling
+    [x,fval] = fminunc(obj, x0);
+    dispVal("fminunc: fval=",fval);
+    par.ca=x(1)*10000; dispVal("ca=", par.ca);
+    par.cb=x(2);       dispVal("cb=", par.cb);
+    par.n =x(3);       dispVal("n =", par.n );
 % % plot and save result
 %     pltRes(par);
+    savPar(par);
 end
 
 function dispVal(s, v)
@@ -210,6 +211,24 @@ function y=funObjEE(x, par)
     end
 end
 
+function y=funObj(x, par)
+% -----------------------------------------------------------------------
+% Purpose: objective function for optimization of Roschke parameters
+% Input  : Vector of optimization parameters x, struct par
+% Output : objective function value to be minimized
+% Author : A. Haumer
+% Date   : 2026-08-15
+% -----------------------------------------------------------------------
+par.ca=x(1)*10000; par.cb=x(2); par.n=x(3); % scaling
+    mu_0=4e-7*pi;
+    y=0;
+    for kd = 2:length(par.JD)
+        B=par.JD(kd)+mu_0*par.HD(kd);
+        HApp=B/(mu_0*app_mu_r(par,B));
+        y = y + (HApp/par.HD(kd)-1)^2;
+    end
+end
+
 function mu_r=app_mu_r(par, B)
 % -----------------------------------------------------------------------
 % Purpose: Calculate relative permeability (Roschke) from flux dens. B
@@ -285,69 +304,11 @@ function savPar(par)
     fileName=['Par_' par.material '.txt'];
     fID=fopen(fileName,'w');
     fprintf(fID, '  extends BaseData(\n');
-% common parameters
-    fprintf(fID, '    Type="%s",\n', par.material);
-    fprintf(fID, '    vRef = %9.2f,\n', par.vRef);
-    fprintf(fID, '    BRef = %9.5f,\n', par.BRef);
-    fprintf(fID, '    fRef = %9.2f,\n', par.fRef);
-    fprintf(fID, '    dens = %9.2f,\n', par.dens);
-    fprintf(fID, '    mu_ri= %9.2f,\n', par.mu_ri);
-% Exponential Extrapolation
-    fprintf(fID, '    k0   = %1u,\n',   par.k0);
-    fprintf(fID, '    Hpar = %9.2f,\n', par.Hpar);
-    fprintf(fID, '    Hsat = %9.1f,\n', par.Hsat);
-    fprintf(fID, '    Jsat = %9.5f,\n', par.Jsat);
-% Homotopy
-    fprintf(fID, '    hH1  = %9.2f,\n', par.hH1);
-    fprintf(fID, '    hH2  = %9.2f,\n', par.hH2);
-%   length of raw data = 1 + length of interval coefficients
-    N=length(par.HD);
-    fprintf(fID, '    N    = %1u,\n', N);
-% Smoothing Spline coefficients
-    for m=1:4
-        fprintf(fID, '    c%1u={\n', 4-m);
-        kB=1; kE=min(kB+4, N-1);
-        while kB<=N-1
-            fprintf(fID, '    ');
-            for k=kB:kE
-                if k==N-1
-                    fprintf(fID, '%12.5e},',par.pp.coefs(k,m));
-                else
-                    fprintf(fID, '%12.5e,' ,par.pp.coefs(k,m));
-                end
-            end
-            fprintf(fID, '\n');
-            kB=kE+1; kE=min(kB+4, N-1);
-        end
-    end
-% Raw Data
-    fprintf(fID, '    HD={\n');
-    kB=1; kE=min(kB+6, N);
-    while kB<=N
-        fprintf(fID, '    ');
-        for k=kB:kE
-            if k==N
-                fprintf(fID, '%9.2f},',par.HD(k));
-            else
-                fprintf(fID, '%9.2f,' ,par.HD(k));
-            end
-        end
-        fprintf(fID, '\n');
-        kB=kE+1; kE=min(kB+6, N);
-    end
-    fprintf(fID, '    JD={\n');
-    kB=1; kE=min(kB+6, N);
-    while kB<=N
-        fprintf(fID, '    ');
-        for k=kB:kE
-            if k==N
-                fprintf(fID, '%9.5f});',par.JD(k));
-            else
-                fprintf(fID, '%9.5f,' ,par.JD(k));
-            end
-        end
-        fprintf(fID, '\n');
-        kB=kE+1; kE=min(kB+6, N);
-    end
+    fprintf(fID, '    label  ="%s",   \n', par.material);
+    fprintf(fID, '    mu_i   = %9.2f, \n', par.mu_ri);
+    fprintf(fID, '    B_myMax= %9.4f, \n', par.B_muMax);
+    fprintf(fID, '    c_a    = %9.1f, \n', par.ca);
+    fprintf(fID, '    c_b    = %9.4f, \n', par.cb);
+    fprintf(fID, '    n      = %9.4f);\n', par.n);
     fclose(fID);
 end
