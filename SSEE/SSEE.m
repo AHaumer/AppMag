@@ -16,6 +16,7 @@ function par=SSEE(material, varargin)
 % Author : A. Haumer
 % Date   : 2026-08-15
 % -----------------------------------------------------------------------
+    par=struct([]);
 % handling of optional input arguments
     fT='txt';
     p =0.005; H0=2000;
@@ -46,7 +47,6 @@ function par=SSEE(material, varargin)
         pkg load io;
     end
 % read RawData
-    par=struct([]);
     if strcmp(fT,"xlsx") || strcmp(fT,"ods")
         fileName=['RD' '.' fT];
         if exist(fileName,'file')~=2
@@ -98,17 +98,20 @@ function par=SSEE(material, varargin)
 % plot and save result
     pltRes(par);
 % show inflection point of J(H): mu_rd - mu_r = d mu_r/dH * H = 0
-    fun = @(H)(fnval(par.pp,H)/H-fnval(par.dpp,H));
-    par.H_muMax=fzero(fun,[0.1*par.HD(2) par.HD(par.k0)]);
-    par.J_muMax=app_J(par, par.H_muMax);
-    par.B_muMax=mu_0*par.H_muMax+par.J_muMax;
-    par.mu_rMax=par.B_muMax/(mu_0*par.H_muMax);
-    disp('Inflection point of J(H) = maximum of mu_r(H):');
-    dispVal('H_muMax=',par.H_muMax);
-    dispVal('B_muMax=',par.B_muMax);
-    dispVal('mu_rMax=',par.mu_rMax);
-    figure(2); plot([0,par.H_muMax],[0,par.J_muMax], 'r-.');
-    figure(4); plot([par.H_muMax,par.H_muMax],[0,par.mu_rMax],'r-.');
+    choice=menu('Is the inflection point of J(H) = the maximum of mu_r present ?','yes','no');
+    if choice==1
+        fun = @(H)(fnval(par.pp,H)/H-fnval(par.dpp,H));
+        par.H_muMax=fzero(fun,[0.1*par.HD(2) par.HD(par.k0)]);
+        par.J_muMax=app_J(par, par.H_muMax);
+        par.B_muMax=mu_0*par.H_muMax+par.J_muMax;
+        par.mu_rMax=par.B_muMax/(mu_0*par.H_muMax);
+        disp('Inflection point of J(H) = maximum of mu_r(H):');
+        dispVal('H_muMax=',par.H_muMax);
+        dispVal('B_muMax=',par.B_muMax);
+        dispVal('mu_rMax=',par.mu_rMax);
+        figure(2); plot([0,par.H_muMax],[0,par.J_muMax], 'r-.');
+        figure(4); plot([par.H_muMax,par.H_muMax],[0,par.mu_rMax],'r-.');
+    end
 % Octave shows additional points at the beginning and at the end!
     if isOctave
         par.pp=corOct(par.pp); par.dpp=corOct(par.dpp);

@@ -8,6 +8,12 @@ function par=Roschke(material, varargin)
 % Author : A. Haumer
 % Date   : 2026-08-15
 % -----------------------------------------------------------------------
+    par=struct([]);
+    choice=menu('Is the maximum of mu_r represented in measured data?','yes','no');
+    if choice~=1
+        disp('The formula of Roschke requires the representation of mu_rMax');
+        return;
+    end
 % handling of optional input arguments
     fT='txt';
     if nargin>=2
@@ -22,7 +28,6 @@ function par=Roschke(material, varargin)
         pkg load io;
     end
 % read RawData
-    par=struct([]);
     if strcmp(fT,"xlsx") || strcmp(fT,"ods")
         fileName=['RD' '.' fT];
         if exist(fileName,'file')~=2
