@@ -224,8 +224,8 @@ par.ca=x(1)*10000; par.cb=x(2); par.n=x(3); % scaling
     y=0;
     for kd = 2:length(par.JD)
         B=par.JD(kd)+mu_0*par.HD(kd);
-        HApp=B/(mu_0*app_mu_r(par,B));
-        y = y + (HApp/par.HD(kd)-1)^2;
+        muApp=app_mu_r(par,B);
+        y = y + (muApp/par.mu_rD(kd)-1)^2;
     end
 end
 
