@@ -1,20 +1,24 @@
 within ;
-package ShowCharacteristic "Base data records"
+package ShowCharacteristic
+  "Library for modelling of electromagnetic devices with lumped magnetic networks"
   import Modelica.Units.SI;
   import Modelica.Constants.mu_0;
 
-  package Examples
+  extends Modelica.Icons.Package;
+
+  package Examples "Illustration of component usage with simple models of various devices"
     extends Modelica.Icons.ExamplesPackage;
+
     model ShowSSEE "Investigate magnetic characteristic"
       extends Modelica.Icons.Example;
       import ShowCharacteristic.SSEE.Functions.app_J;
       import ShowCharacteristic.SSEE.Functions.app_mu_r;
       import ShowCharacteristic.SSEE.Functions.app_mu_rd;
-      parameter SSEE.M330_50A material
+      parameter ShowCharacteristic.SSEE.M350_50A material
         annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
       constant SI.Time Tend=1;
       parameter SI.MagneticFieldStrength Hmin=-1000 "Start of H";
-      parameter SI.MagneticFieldStrength Hmax= 1000 "End of H";
+      parameter SI.MagneticFieldStrength Hmax=+1000 "End of H";
       SI.MagneticFieldStrength H=Hmin + (Hmax - Hmin)*time/Tend "Driving field strength";
       parameter SI.Area wA=1 "Number of turns x area";
       SI.MagneticPolarization J=app_J(H, material) "Approx. polarization";
@@ -31,9 +35,12 @@ package ShowCharacteristic "Base data records"
 Magnetic field Strength <code>H</code> is varied within 1 second from <code>Hmin</code> to <code>Hmax</code>. 
 Magnetic polarization <code>J</code>, magnetic flux density <code>B</code>, relative permeability <code>mu_r</code>, differential relative permeability <code>mu_rd</code>, 
 magnetic flux linkage <code>psi</code> and induced voltage <code>v</code> are calculated an can be plotted versus H to investigate the characteristic of the choosen material. 
+Additionally, all approximation functions are tested. 
 </p>
 </html>"));
     end ShowSSEE;
+    annotation (Documentation(info="<html>
+</html>"));
   end Examples;
 
   package Roschke "Softmagnetic material with approximation acc. to Rischke"
@@ -47,8 +54,8 @@ magnetic flux linkage <code>psi</code> and induced voltage <code>v</code> are ca
           "Flux density in ferromagnetic flux tube element";
         //Material specific parameter set:
         input ShowCharacteristic.Roschke.BaseData material "Material data";
-        output SI.RelativePermeability mu_r=1 +
-          (material.mu_i - 1 + material.c_a*B_N)/(1 + material.c_b*B_N + B_N^material.n)
+        output SI.RelativePermeability mu_r=
+          1 + (material.mu_i - 1 + material.c_a*B_N)/(1 + material.c_b*B_N + B_N^material.n)
           "Relative magnetic permeability of ferromagnetic flux tube element";
       protected
         Real B_N=abs(B/material.B_myMax)
@@ -471,10 +478,10 @@ Returns magnetic polarization <code>J</code> calculated from smoothing splines a
         extends Modelica.Icons.Function;
         input SI.MagneticFieldStrength H "Magnetic field strength";
         input BaseData material "Material data";
-        input Types.MagneticFieldStrengthSlope derH
+        input ShowCharacteristic.Types.MagneticFieldStrengthSlope derH
           "Derivative of magnetic field strength";
-        output Types.MagneticFluxDensitySlope derJ=mu_0*(app_mu_rd(H,material) - 1)*derH
-          "Slope of magnetic polarization";
+        output ShowCharacteristic.Types.MagneticFluxDensitySlope derJ=mu_0*(
+            app_mu_rd(H, material) - 1)*derH "Slope of magnetic polarization";
         annotation (Documentation(info="<html>
 <p>
 Returns slope of magnetic polarization <code>J</code> calculated from susceptibility.
@@ -502,7 +509,7 @@ Returns relative permeability <code>mu_r = J(H)/(mu_0*H)</code>; for <code>H</co
         extends Modelica.Icons.Function;
         input SI.MagneticFieldStrength H "Magnetic field strength";
         input BaseData material "Material data";
-        input Types.MagneticFieldStrengthSlope derH
+        input ShowCharacteristic.Types.MagneticFieldStrengthSlope derH
           "Derivative of magnetic field strength";
         output Real dermu_r=if abs(H)<Heps then 0
           else (app_mu_rd(H, material) - app_mu_r(H, material))/H*derH
@@ -625,12 +632,12 @@ Returns magnetic polarization <code>J</code> calculated from exponential extrapo
           SI.MagneticFieldStrength dH;
         algorithm
           if k<=0 then
-            chi_d := c1[1]/Modelica.Constants.mu_0;
+            chi_d:=c1[1]/mu_0;
           elseif k>=N then
             dH:=HD[N] - HD[N - 1];
-            chi_d := (((3*c3[N - 1]*dH + 2*c2[N - 1]))*dH + c1[N - 1])/mu_0;
+            chi_d:=(((3*c3[N - 1]*dH + 2*c2[N - 1]))*dH + c1[N - 1])/mu_0;
           else
-            chi_d := ((3*c3[k]*(abs(H) - HD[k]) + 2*c2[k])*(abs(H) - HD[k]) + c1[k])/mu_0;
+            chi_d:=((3*c3[k]*(abs(H) - HD[k]) + 2*c2[k])*(abs(H) - HD[k]) + c1[k])/mu_0;
           end if;
           annotation (Documentation(info="<html>
 <p>
@@ -652,7 +659,7 @@ Returns differential susceptibility <code>chi_d</code> calculated from smoothing
           SI.MagneticFieldStrength Hpar=material.Hpar;
           SI.MagneticPolarization  Jsat=material.Jsat;
         algorithm
-          chi_d := (Jsat - JD[k0])/(mu_0*Hpar)*exp(-(abs(H) - HD[k0])/Hpar);
+          chi_d:=(Jsat - JD[k0])/(mu_0*Hpar)*exp(-(abs(H) - HD[k0])/Hpar);
           annotation (Documentation(info="<html>
 <p>
 Returns differential susceptibility <code>chi_d</code> calculated from exponential extrapolation for magnetic field strength <code>H</code>.
@@ -693,7 +700,7 @@ Determines the interval <code>k</code> that includes the value <code>x</code>: <
     record BaseData "CastIron"
       extends Modelica.Icons.Record;
       parameter String Type="CastIron";
-      parameter Types.SpecificPower vRef=25.
+      parameter ShowCharacteristic.Types.SpecificPower vRef=25.
         "Specific losses at BRef and fRef";
       parameter SI.MagneticFluxDensity BRef=1.5 "Ref. flux density for spec. losses";
       parameter SI.Frequency fRef=50 "Ref. frequency for spec. losses";
@@ -1735,7 +1742,7 @@ Many thanks to that company for allowing us to use this data!
   package Types "Types with choices, especially to build menus"
     extends Modelica.Icons.TypesPackage;
 
-    type Magnetization = enumeration(
+    type MagType       = enumeration(
       Roschke "Approximation formula according to Roschke",
       SSEE "Approximation with Smoothing Splines and Exponential Extrapolation")
       "Enumeration defining the approximation of the magnetization characteristic";
