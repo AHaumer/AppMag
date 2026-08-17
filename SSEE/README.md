@@ -24,6 +24,10 @@ par is a struct containing the parameters:
 - Hpar          parameter for exponential extrapolation
 - pp            struct containing the parameters of the smoothing splines
 - dpp           struct containing the parameters of the derivatives of the smoothing splines
+- H_muMax	field strength at maximum permeability
+- J_muMax	polarization at maximum permeability
+- B_muMax	flux density at maximum permeability
+- mu_rMax	maximum relative permeability
 ```
 
 material has to be specified: The name of the material, same as the name of the sheet in RD.ods
