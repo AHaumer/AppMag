@@ -30,7 +30,7 @@ par is a struct containing the parameters:
 - mu_rMax	maximum relative permeability
 ```
 
-material has to be specified: The name of the material, same as the name of the sheet in RD.ods
+material has to be specified: The name of the material (fileName or sheetName)
 optional parameters with default values:
 ```
 - ft = 'txt', 'xslx', 'ods'    file type
@@ -42,4 +42,4 @@ optional parameters with default values:
 
 The result is compared in figures J(H), mu_r(H) and mu_rd(H) with raw data.
 Furthermore, the result is written into a text file named Par_material.txt
-which can be used directly in Modelica to extend from the given BaseData.mo.
+which can be used directly in Modelica to extend from the given Modelica record Material.SSEE.BaseData
