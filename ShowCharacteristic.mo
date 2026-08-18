@@ -9,7 +9,7 @@ package ShowCharacteristic
   package Examples
     extends Modelica.Icons.ExamplesPackage;
 
-    model PartialShow "Investigate magnetic characteristic"
+    partial model PartialShow "Investigate magnetic characteristic"
       extends Modelica.Icons.Example;
       parameter SI.MagneticFieldStrength Hmin=-1000 "Start of H";
       parameter SI.MagneticFieldStrength Hmax=+1000 "End of H";
