@@ -43,4 +43,4 @@ optional parameters with default values:
 The result is compared in figures J(H), mu_r(H) and mu_rd(H) with raw data.
 Furthermore, the result is written into a text file named Par_material.txt
 which can be used directly in Modelica to extend from the given Modelica record ShowCharacteristic.SSEE.BaseData;
-with the Modelica example ShowSSEE characteristics can be investigated. 
+with the Modelica example ShowCharacteristic.Examples.ShowSSEE the behaviour of the approximation can be investigated. 
