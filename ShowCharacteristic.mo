@@ -1,32 +1,74 @@
 within ;
 package ShowCharacteristic
-  "Library for modelling of electromagnetic devices with lumped magnetic networks"
+                          "Show magnetic characetristics"
   import Modelica.Units.SI;
   import Modelica.Constants.mu_0;
 
   extends Modelica.Icons.Package;
 
-  package Examples "Illustration of component usage with simple models of various devices"
+  package Examples
     extends Modelica.Icons.ExamplesPackage;
 
-    model ShowSSEE "Investigate magnetic characteristic"
+    model PartialShow "Investigate magnetic characteristic"
       extends Modelica.Icons.Example;
-      import ShowCharacteristic.SSEE.Functions.app_J;
-      import ShowCharacteristic.SSEE.Functions.app_mu_r;
-      import ShowCharacteristic.SSEE.Functions.app_mu_rd;
-      parameter ShowCharacteristic.SSEE.M350_50A material
-        annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
-      constant SI.Time Tend=1;
       parameter SI.MagneticFieldStrength Hmin=-1000 "Start of H";
       parameter SI.MagneticFieldStrength Hmax=+1000 "End of H";
       SI.MagneticFieldStrength H=Hmin + (Hmax - Hmin)*time/Tend "Driving field strength";
       parameter SI.Area wA=1 "Number of turns x area";
-      SI.MagneticPolarization J=app_J(H, material) "Approx. polarization";
+      SI.MagneticPolarization J "Approx. polarization";
       SI.MagneticFluxDensity B=mu_0*H + J "Approx. flux density";
-      SI.RelativePermeability mu_r=app_mu_r(H, material) "Approx. relative permeability";
-      SI.RelativePermeability mu_rd=app_mu_rd(H, material) "Approx. relative differential permeability";
+      SI.RelativePermeability mu_r "Approx. relative permeability";
+      SI.RelativePermeability mu_rd "Approx. relative differential permeability";
       SI.MagneticFlux psi=wA*B "Flux linkage";
       SI.Voltage v=-der(psi) "Induced voltage";
+    protected
+      constant SI.Time Tend=1;
+      annotation (experiment(
+          StopTime = 1,
+          Interval=0.0001,
+          Tolerance=1e-06), Documentation(info="<html>
+<p>
+Magnetic field Strength <code>H</code> is varied within 1 second from <code>Hmin</code> to <code>Hmax</code>. 
+Magnetic polarization <code>J</code>, magnetic flux density <code>B</code>, relative permeability <code>mu_r</code>, differential relative permeability <code>mu_rd</code>, 
+magnetic flux linkage <code>psi</code> and induced voltage <code>v</code> are calculated an can be plotted versus H to investigate the characteristic of the choosen material. 
+Additionally, all approximation functions are tested. 
+</p>
+</html>"));
+    end PartialShow;
+
+    model ShowRoschke "Investigate magnetic characteristic"
+      import ShowCharacteristic.Roschke.Functions.app_mu_r;
+      extends PartialShow(mu_r(start=material.mu_i));
+      parameter Roschke.ElectricSheet.M350_50A   material
+        annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
+    equation
+        J=mu_0*(mu_r-1)*H;
+        mu_r=app_mu_r(B,material);
+        mu_rd=der(B)/(mu_0*der(H));
+      annotation (experiment(
+          StopTime = 1,
+          Interval=0.0001,
+          Tolerance=1e-06), Documentation(info="<html>
+<p>
+Magnetic field Strength <code>H</code> is varied within 1 second from <code>Hmin</code> to <code>Hmax</code>. 
+Magnetic polarization <code>J</code>, magnetic flux density <code>B</code>, relative permeability <code>mu_r</code>, differential relative permeability <code>mu_rd</code>, 
+magnetic flux linkage <code>psi</code> and induced voltage <code>v</code> are calculated an can be plotted versus H to investigate the characteristic of the choosen material. 
+Additionally, all approximation functions are tested. 
+</p>
+</html>"));
+    end ShowRoschke;
+
+    model ShowSSEE "Investigate magnetic characteristic"
+      import ShowCharacteristic.SSEE.Functions.app_J;
+      import ShowCharacteristic.SSEE.Functions.app_mu_r;
+      import ShowCharacteristic.SSEE.Functions.app_mu_rd;
+      extends PartialShow;
+      parameter ShowCharacteristic.SSEE.M350_50A material
+        annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
+    equation
+        J=app_J(H, material);
+        mu_r=app_mu_r(H, material);
+        mu_rd=app_mu_rd(H, material);
       annotation (experiment(
           StopTime = 1,
           Interval=0.0001,
@@ -480,8 +522,8 @@ Returns magnetic polarization <code>J</code> calculated from smoothing splines a
         input BaseData material "Material data";
         input ShowCharacteristic.Types.MagneticFieldStrengthSlope derH
           "Derivative of magnetic field strength";
-        output ShowCharacteristic.Types.MagneticFluxDensitySlope derJ=mu_0*(
-            app_mu_rd(H, material) - 1)*derH "Slope of magnetic polarization";
+        output ShowCharacteristic.Types.MagneticFluxDensitySlope derJ=
+          mu_0*(app_mu_rd(H, material) - 1)*derH "Slope of magnetic polarization";
         annotation (Documentation(info="<html>
 <p>
 Returns slope of magnetic polarization <code>J</code> calculated from susceptibility.
