@@ -499,15 +499,20 @@ Please refer to the description of  the enclosing package <a href=\"modelica://M
         extends Modelica.Icons.Function;
         input SI.MagneticFieldStrength H "Magnetic field strength";
         input BaseData material "Material data";
-        output SI.MagneticPolarization J=
-          if abs(H) < material.hH1 then Internal.app_J_SS(H, material)
-          elseif abs(H) > material.hH2 then Internal.app_J_EE(H, material)
-          else (1 - h)*Internal.app_J_SS(H, material) + h*Internal.app_J_EE(H, material)
-          "Magnetic polarization";
+        output SI.MagneticPolarization J "Magnetic polarization";
       protected
-        Real h=if abs(H)<material.hH1 then 0 elseif abs(H)>material.hH2 then 1
-          else (abs(H) - material.hH1)/(material.hH2 - material.hH1)
-          "Helper function";
+        Real h "Helper function";
+      algorithm
+        if abs(H)<material.hH1 then
+          h:=0;
+          J:=Internal.app_J_SS(H, material);
+        elseif abs(H)>material.hH2 then
+          h:=1;
+          J:=Internal.app_J_EE(H, material);
+        else
+          h:=(abs(H) - material.hH1)/(material.hH2 - material.hH1);
+          J:=(1 - h)*Internal.app_J_SS(H, material) + h*Internal.app_J_EE(H, material);
+        end if;
         annotation (derivative(noDerivative=material)=der_J,
           Documentation(info="<html>
 <p>
@@ -569,15 +574,21 @@ Returns slope of relative permeability <code>mu_r = J(H)/(mu_0*H)</code>.
         extends Modelica.Icons.Function;
         input SI.MagneticFieldStrength H "Magnetic field strength";
         input BaseData material "Material data";
-        output SI.RelativePermeability mu_rd=
-          if abs(H) < material.hH1 then 1 + Internal.app_chi_d_SS(H, material)
-          elseif abs(H) > material.hH2 then 1 + Internal.app_chi_d_EE(H, material)
-          else 1 + (1 - h)*Internal.app_chi_d_SS(H, material) + h*Internal.app_chi_d_EE(H, material)
-          "Differential relative permeability";
+        output SI.RelativePermeability mu_rd "Differential relative permeability";
       protected
-        Real h=if abs(H)<material.hH1 then 0 elseif abs(H)>material.hH2 then 1
-          else (abs(H) - material.hH1)/(material.hH2 - material.hH1)
-          "Helper function";
+        Real h "Helper function";
+      algorithm
+        if abs(H)<material.hH1 then
+          h:=0;
+          mu_rd:=1 + Internal.app_chi_d_SS(H, material);
+        elseif abs(H)>material.hH2 then
+          h:=1;
+          mu_rd:=1 + Internal.app_chi_d_EE(H, material);
+        else
+          h:=(abs(H) - material.hH1)/(material.hH2 - material.hH1);
+          mu_rd:=1 + (1 - h)*Internal.app_chi_d_SS(H, material) +
+                          h* Internal.app_chi_d_EE(H, material);
+        end if;
         annotation (Documentation(info="<html>
 <p>
 Returns differential relative permeability <code>mu_rd</code> calculated from smoothing splines and exponential extrapolation for magnetic field strength <code>H</code>.
