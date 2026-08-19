@@ -20,8 +20,9 @@ Each material is stored in a separate sheet with the following format:
 ## Note:
 Measured data have to include the rise of mu_r from mu_ri to mu_rMax, i.e. the inflection point of J(H).
 
-Copy rawData and functions directtory together with the approximation function into a working directory.
+Copy rawData and functions directory together with the approximation function into a working directory.
 There is a growing collection of functions that can be called in Octave or Matlab.
+To show raw data: use function showRD(material).
 It is planned to provide different methods of approximation.
 First, Smoothing Splines with Exponential Extrapolation [SSEE](docs/SSEE.md) are implemented.
 
