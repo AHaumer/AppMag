@@ -65,10 +65,10 @@ function par=showRD(material, varargin)
     figure;
     loglog(par.HD(2:ND), par.mu_rD(2:ND), ':ok');
     title(par.material); grid on;
-    xlabel("H [A/m]"); ylabel("Âµ_r");
+    xlabel("H [A/m]"); ylabel("µ_r");
     figure;
     plot(par.HD, par.mu_rD, ':ok');
     title(par.material); grid on;
-    xlabel("H [A/m]"); ylabel("Âµ_r");
+    xlabel("H [A/m]"); ylabel("µ_r");
     xlim([0 500]);
 end
