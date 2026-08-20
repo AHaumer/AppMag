@@ -21,13 +21,13 @@ function pltResSSEE(par)
 % J(H)
     figure;
     semilogx(H(2:Np), J(2:Np), 'b-'); hold on;
-    semilogx(par.HD(2:ND), par.JD(2:ND), 'ro');
+    semilogx(par.HD(2:ND), par.JD(2:ND), 'bo');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("J [T]");
     legend('J(H)','measured','Location','southeast');
     figure;
     plot(H, J, 'b-'); hold on;
-    plot(par.HD, par.JD, 'ro');
+    plot(par.HD, par.JD, 'bo');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("J [T]");
     legend('J(H)','measured','Location','southeast','AutoUpdate','off');
@@ -35,14 +35,14 @@ function pltResSSEE(par)
 % mu_r(H) and mu_rd(H)
     figure;
     loglog(H(2:Np), mu_r(2:Np), 'b-'); hold on;
-    loglog(par.HD(2:ND), par.mu_rD(2:ND), 'ro');
+    loglog(par.HD(2:ND), par.mu_rD(2:ND), 'bo');
     loglog(H(2:Np), mu_rd(2:Np), 'k--');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("µ_r");
     legend('µ_r(H)','measured','µ_r_d(H)','Location','northeast');
     figure;
     plot(H, mu_r, 'b-'); hold on;
-    plot(par.HD, par.mu_rD, 'ro');
+    plot(par.HD, par.mu_rD, 'bo');
     plot(H, mu_rd, 'k--');
     title(par.material); grid on;
     xlabel("H [A/m]"); ylabel("µ_r");

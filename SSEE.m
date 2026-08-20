@@ -97,8 +97,8 @@ function par=SSEE(material, varargin)
     par.Jsat=x(1);       dispVal("Jsat=", par.Jsat);
     par.Hpar=x(2)*10000; dispVal("Hpar=", par.Hpar);
 % Hsat to approach "near" Jsat (with 1 ppm deviation)
-    par.Hsat=par.HD(par.k0)-par.Hpar*log(1e-6*par.Jsat/ ...
-        (par.Jsat-par.JD(par.k0)));
+    par.Hsat=par.HD(par.k0)+par.Hpar* ...
+        log((par.Jsat-par.JD(par.k0))/(1e-6*par.Jsat));
 % plot and save result
     pltResSSEE(par);
 % show inflection point of J(H): mu_rd - mu_r = d mu_r/dH * H = 0
@@ -114,8 +114,8 @@ function par=SSEE(material, varargin)
         dispVal('H_muMax=',par.H_muMax);
         dispVal('B_muMax=',par.B_muMax);
         dispVal('mu_rMax=',par.mu_rMax);
-        figure(2); plot([0,par.H_muMax],[0,par.J_muMax], 'r-.');
-        figure(4); plot([par.H_muMax,par.H_muMax],[0,par.mu_rMax],'r-.');
+        figure(2); plot([0,par.H_muMax],[0,par.J_muMax], 'r-o');
+        figure(4); plot([par.H_muMax,par.H_muMax],[0,par.mu_rMax],'r-o');
     end
 % Octave shows additional points at the beginning and at the end!
     if isOctave
