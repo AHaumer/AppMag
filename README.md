@@ -2,6 +2,8 @@
 Approximation of Magnetization characteristics
 taking into account saturation but neglecting hysteresis
 
+For a description of the merhods see [Approximation of Magnetic Characteristics](docs/ApproximationMagneticCharacteristics.pdf)
+
 This repository hosts in subdirectory RawData datasets of softmagnetic materials 
 as single txt-files, as spreadsheet file RD.ods in OpenDocument format ods 
 and as Microsoft Excel format xlsx.
