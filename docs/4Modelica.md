@@ -1,6 +1,6 @@
 # Modelica parameter records
 
-The file Par_*material*.txt can transferred by copy and paste into a Modelica parameter record as shown in *ShowCharacteristic.mo*:
+The file Par_*material*.txt can be transferred by copy and paste into a Modelica parameter record as shown in *ShowCharacteristic.mo*:
 
 ```
 record *material*
