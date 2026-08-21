@@ -24,3 +24,15 @@
 - B_muMax  flux density at maximum permeability
 - mu_rMax  maximum relative permeability
 ```
+
+### FIgures:
+
+1. J(H) over the whole measured H-range with logarithmic x-axis.
+
+2. J(H) over a limited range with linear axes to show the behaviour near the origin. The axis limits can be adapted manually.
+
+3. &mu;<sub>r</sub> relative permeability and optional &mu;<sub>rd</sub> differential relative permeability over the whole measured H-range with double logarithmic axes.
+
+4. &mu;<sub>r</sub> relative permeability and optional &mu;<sub>rd</sub> differential relative permeability over a limited range with linear axes to show the behaviour near the origin. The axis limits can be adapted manually.
+
+Differential permeability is not easy to calculate for raw data, this strongly depend on interpolation / approximation and therefore it is omitted when showing only raw data. 

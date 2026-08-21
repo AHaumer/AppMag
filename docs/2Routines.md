@@ -22,17 +22,7 @@ With an optional parameter it is possible to choose the filetype to be used:
 
 * 'xlsx' uses the Excel spreadsheet.
 
-The function produces 4 figures:
-
-1. J(H) over the whole measured H-range with logarithmic x-axis.
-
-2. J(H) over a small range up to 1000 A/m with linear axes to show the behaviour near the origin. The axis limits can be adapted manually.
-
-3. &mu;<sub>r</sub> relative permeability over the whole measured H-range with double logarithmic axes.
-
-4. &mu;<sub>r</sub> relative permeability over a small range up to 500 A/m with linear axes to show the behaviour near the origin. The axis limits can be adapted manually.
-
-Other quantities like differential permebility are either not easy to calculate or stringly dependent on interpolation / approximation.
+The function produces 4 figures described separately in the Description of Results.
 
 ## SSEE
 
@@ -60,17 +50,9 @@ There are 4 additonal optional parameters to control the parameter calculation w
 
 * `H2=20000` defines the end of switch-over from *SS* to *EE*.
 
-The function produces 4 figures:
+The function produces 4 figures described separately in the Description of Results.
 
-1. J(H) over the whole measured H-range with logarithmic x-axis.
-
-2. J(H) over a small range up to 1000 A/m with linear axes to show the behaviour near the origin. The axis limits can be adapted manually.
-
-3. &mu;<sub>r</sub> relative permeability and &mu;<sub>rd</sub> differential relative permeability over the whole measured H-range with double logarithmic axes.
-
-4. &mu;<sub>r</sub> relative permeability and &mu;<sub>rd</sub> differential relative permeability over a small range up to 500 A/m with linear axes to show the behaviour near the origin. The axis limits can be adapted manually.
-
-Additionally, the user is asked whether the maximum of  relative permeability&mu;<sub>r</sub> (i.e. the inflection point of *J(H)*) is visible in figure 4. If the answer is "yes", this special point is marked in figure 2 and 4.
+Additionally, the user is asked whether the maximum of  relative permeability&mu;<sub>r</sub> is visible in figure 4. If the answer is "yes", this special point is marked in figure 2 and 4.
 
 The routine's output is a struct par, the structure is explaines separately.
 
