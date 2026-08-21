@@ -3,15 +3,6 @@ function par=read_xls(fileName, material)
 % Purpose: read raw data from spreadsheet
 % Input  : material -> -> file with raw data fileName / sheet material
 % Output : struct par
-% Mandatory structure of spreadsheet:
-% 1 material name = sheet
-% 2 vRef
-% 3 BRef
-% 4 fRef
-% 5 dens
-% 6 N = count of data lines
-% 7 header: J [T] H [A/m]
-% 8         0     0
 % Author : A. Haumer
 % Date   : 2026-08-15
 % -----------------------------------------------------------------------

@@ -100,7 +100,7 @@ function par=SSEE(material, varargin)
     par.Hsat=par.HD(par.k0)+par.Hpar* ...
         log((par.Jsat-par.JD(par.k0))/(1e-6*par.Jsat));
 % plot and save result
-    pltResSSEE(par);
+    fig=pltRes(par, false);
 % show inflection point of J(H): mu_rd - mu_r = d mu_r/dH * H = 0
     q='Is the inflection point of J(H) = the maximum of mu_r present ?';
     choice=menu(q,'yes','no');
@@ -114,8 +114,8 @@ function par=SSEE(material, varargin)
         dispVal('H_muMax=',par.H_muMax);
         dispVal('B_muMax=',par.B_muMax);
         dispVal('mu_rMax=',par.mu_rMax);
-        figure(2); plot([0,par.H_muMax],[0,par.J_muMax], 'r-o');
-        figure(4); plot([par.H_muMax,par.H_muMax],[0,par.mu_rMax],'r-o');
+        figure(fig(2)); plot([0,par.H_muMax],[0,par.J_muMax], 'r-o');
+        figure(fig(4)); plot([par.H_muMax,par.H_muMax],[0,par.mu_rMax],'r-o');
     end
 % Octave shows additional points at the beginning and at the end!
     if isOctave

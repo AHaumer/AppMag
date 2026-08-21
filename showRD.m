@@ -51,24 +51,5 @@ function par=showRD(material, varargin)
     for kp=1:length(par.HD)
         par.mu_rD(kp,1) =fun_mu_r(par.JD(kp),par.HD(kp),app_mu_ri(par));
     end
-    ND=length(par.HD);
-    figure;
-    semilogx(par.HD(2:ND), par.JD(2:ND), ':ok');
-    title(par.material); grid on;
-    xlabel("H [A/m]"); ylabel("J [T]");
-    figure;
-    plot(par.HD, par.JD, ':ok');
-    title(par.material); grid on;
-    xlabel("H [A/m]"); ylabel("J [T]");
-    xlim([0 1000]);
-    % mu_r(H)
-    figure;
-    loglog(par.HD(2:ND), par.mu_rD(2:ND), ':ok');
-    title(par.material); grid on;
-    xlabel("H [A/m]"); ylabel("µ_r");
-    figure;
-    plot(par.HD, par.mu_rD, ':ok');
-    title(par.material); grid on;
-    xlabel("H [A/m]"); ylabel("µ_r");
-    xlim([0 500]);
+    fig=pltRes(par, true);
 end

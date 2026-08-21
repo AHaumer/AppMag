@@ -3,16 +3,6 @@ function par=read_txt(fileName)
 % Purpose: read raw data from txt-file
 % Input  : fileName
 % Output : struct par
-% Mandatory structure of raw data (txt) file:
-% #1
-% # M330-50A
-% # vRef = 3.30
-% # Bref = 1.5
-% # fRef = 50
-% # dens = 7650
-% double JH(33, 2)
-% 0.000000000	00.00000000
-% Important: use the same delimiter '\t' for all lines of data!
 % Author : A. Haumer
 % Date   : 2026-08-15
 % -----------------------------------------------------------------------
