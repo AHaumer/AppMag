@@ -16,6 +16,7 @@ function par=read_txt(fileName)
 % Author : A. Haumer
 % Date   : 2026-08-15
 % -----------------------------------------------------------------------
+    firstLine=9; % Line before table starts
 % get additional scalar parameters to save them later to parameter file
     fID=fopen(fileName); % skip first 2 lines #1 and # type
     fgetl(fID); fgetl(fID);
@@ -25,11 +26,10 @@ function par=read_txt(fileName)
     line=fgetl(fID); par.dens=str2double(line(strfind(line,"=")+1:end));
     fclose(fID);
 % raw data arrays J and H (ensure that all lines use the same delimiter!)
-    firstLine=7; % Line where table starts
     if exist("OCTAVE_VERSION","builtin")>0
         RD=dlmread(fileName,'\t',firstLine,0);
     else
-        RD=readmatrix(fileName);
+        RD=readmatrix(fileName,'NumHeaderLines',firstLine);
     end
     par.HD=RD(:,2); par.JD=RD(:,1);
     dispVal("txt: Lines of raw data=", length(par.HD));

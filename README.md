@@ -1,33 +1,27 @@
 # AppMag
+
 Approximation of Magnetization characteristics
 taking into account saturation but neglecting hysteresis
 
-For a description of the merhods see [Approximation of Magnetic Characteristics](docs/ApproximationMagneticCharacteristics.pdf)
+For a description of the theory see [Approximation of Magnetic Characteristics](docs/ApproximationMagneticCharacteristics.pdf)
 
-This repository hosts in subdirectory RawData datasets of softmagnetic materials 
-as single txt-files, as spreadsheet file RD.ods in OpenDocument format ods 
-and as Microsoft Excel format xlsx.
-Each material is stored in a separate sheet with the following format:
-```
-- CastIron                 name of material
-- vRef      25.    W/kg    specific lossed
-- BRef      1.5    T       flux density for measurement of vRef
-- fRef      50.    Hz      frequency for measurement of vRef
-- dens    7500.    kg/m3   density of material
-- N          22            number of knots
-- J[T]   H[A/m]            table of measurements
-- 0      0                 starting at the origin
-```
+## RawData
 
-## Note:
-Measured data have to include the rise of mu_r from mu_ri to mu_rMax, i.e. the inflection point of J(H).
+See [Description of RawData](docs/1RawData.md)
 
-Copy rawData and functions directory together with the approximation function into a working directory.
-There is a growing collection of functions that can be called in Octave or Matlab.
-To show raw data: use function showRD(material).
-It is planned to provide different methods of approximation.
-First, Smoothing Splines with Exponential Extrapolation [SSEE](docs/SSEE.md) are implemented.
+## Usage of routines
+
+See [Description of Routines](docs/2Routines.md)
+
+## Results
+
+See [Description of Results](docs/3Results.md)
+
+## Usage of results
+
+See [Description of Modelica examples](docs/4Modelica.md)
 
 ## Acknowledgements
+
 Raw data sets were provided by [VoestAlpine](https://www.voestalpine.com/isovac/en/Downloads/Datasheets).
 Many thanks for that valuable support!
